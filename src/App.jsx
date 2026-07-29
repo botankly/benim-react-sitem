@@ -258,12 +258,57 @@ export function useLocalStorage(key, initialValue) {
   }
 ];
 
+// Yetenek Havuzu Verileri
+const SKILLS_DATA = {
+  frontend: [
+    { name: 'React.js', icon: '⚛️', level: 'İleri Seviye' },
+    { name: 'TypeScript', icon: '📘', level: 'İleri Seviye' },
+    { name: 'Vite', icon: '⚡', level: 'İleri Seviye' },
+    { name: 'Tailwind CSS', icon: '🎨', level: 'Uzman Seviye' },
+    { name: 'HTML5 & CSS3', icon: '🌐', level: 'Uzman Seviye' },
+    { name: 'Next.js', icon: '🚀', level: 'Orta Seviye' }
+  ],
+  backend: [
+    { name: 'Node.js', icon: '🟢', level: 'Orta Seviye' },
+    { name: 'Python (Django)', icon: '🐍', level: 'İleri Seviye' },
+    { name: 'Express.js', icon: '🚂', level: 'Orta Seviye' },
+    { name: 'MySQL / SQLite', icon: '🛢️', level: 'İleri Seviye' },
+    { name: 'REST APIs', icon: '🔗', level: 'Uzman Seviye' }
+  ],
+  mobile: [
+    { name: 'React Native', icon: '📱', level: 'İleri Seviye' },
+    { name: 'Expo', icon: '🍇', level: 'İleri Seviye' },
+    { name: 'Android Studio', icon: '🤖', level: 'Orta Seviye' }
+  ],
+  devops: [
+    { name: 'Git & GitHub', icon: '🐙', level: 'Uzman Seviye' },
+    { name: 'Vercel / Netlify', icon: '▲', level: 'Uzman Seviye' },
+    { name: 'Docker', icon: '🐳', level: 'Orta Seviye' },
+    { name: 'npm / yarn / uv', icon: '📦', level: 'Uzman Seviye' }
+  ]
+};
+
 export default function App() {
   const [isWeatherOpen, setIsWeatherOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [isTodoOpen, setIsTodoOpen] = useState(false);
   const [isBlogOpen, setIsBlogOpen] = useState(false);
   const [isTrendsepetixOpen, setIsTrendsepetixOpen] = useState(false);
+  
+  // Tema ve Yetenek Sekmesi States
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
+  const [activeSkillTab, setActiveSkillTab] = useState('frontend');
+
+  useEffect(() => {
+    if (theme === 'light') {
+      document.body.classList.add('light-theme');
+    } else {
+      document.body.classList.remove('light-theme');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   
   // Arama Girişi State
   const [cityInput, setCityInput] = useState('');
@@ -504,6 +549,28 @@ export default function App() {
             <li><a href="#blog">Blog</a></li>
             <li><a href="#github-activity">GitHub</a></li>
             <li><a href="#iletisim" onClick={(e) => { e.preventDefault(); setIsContactOpen(true); }}>İletişim</a></li>
+            <li>
+              <button 
+                onClick={toggleTheme} 
+                className="theme-toggle-btn"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-main)',
+                  cursor: 'pointer',
+                  fontSize: '1.1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '4px 8px',
+                  borderRadius: '8px',
+                  transition: 'background 0.2s',
+                  lineHeight: '1'
+                }}
+                title={theme === 'dark' ? 'Açık Temaya Geç' : 'Koyu Temaya Geç'}
+              >
+                {theme === 'dark' ? '☀️' : '🌙'}
+              </button>
+            </li>
           </ul>
         </div>
       </header>
@@ -599,6 +666,91 @@ export default function App() {
                 <span className="stat-card-value">Spor, Futbol, Voleybol & Topluluk ve Bilgi Paylaşımı</span>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Kariyer & Eğitim Yolculuğu (Timeline) Bölümü */}
+        <section id="journey" className="section" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '5rem' }}>
+          <h2 className="section-title">Kariyer & Eğitim Yolculuğu</h2>
+          <div className="timeline">
+            {/* Item 1 */}
+            <div className="timeline-item">
+              <div className="timeline-dot"></div>
+              <div className="timeline-date">2026 - Günümüz</div>
+              <div className="timeline-content">
+                <h3>Trendsepetix AI & Web Geliştirme</h3>
+                <span className="timeline-tag">Proje Lideri & Fullstack Geliştirici</span>
+                <p>Yapay zeka ve veri madenciliği tabanlı Trendsepetix projesini tasarladı. Python (Django) ve React mimarisiyle Apriori birliktelik kural analizi sunan karar destek sistemini hayata geçirdi.</p>
+              </div>
+            </div>
+            
+            {/* Item 2 */}
+            <div className="timeline-item">
+              <div className="timeline-dot"></div>
+              <div className="timeline-date">2025 - 2026</div>
+              <div className="timeline-content">
+                <h3>Yazılım Geliştirme Stajı</h3>
+                <span className="timeline-tag">Stajyer Geliştirici</span>
+                <p>Ön uç geliştirme süreçlerinde ve API entegrasyonlarında aktif görev aldı. Git ve takım çalışması pratikleri kazandı, modern JavaScript kütüphanelerini deneyimledi.</p>
+              </div>
+            </div>
+
+            {/* Item 3 */}
+            <div className="timeline-item">
+              <div className="timeline-dot"></div>
+              <div className="timeline-date">2022 - 2026</div>
+              <div className="timeline-content">
+                <h3>Fırat Üniversitesi</h3>
+                <span className="timeline-tag">Yazılım Mühendisliği (Lisans)</span>
+                <p>Algoritmalar, veri yapıları, nesne yönelimli programlama, veritabanı yönetim sistemleri ve yazılım mimarileri üzerine teorik ve pratik eğitim aldı.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Yetenek Havuzu Bölümü */}
+        <section id="skills-section" className="section" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '5rem' }}>
+          <h2 className="section-title">Yetenek Havuzu</h2>
+          
+          {/* Tab buttons */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
+            {Object.keys(SKILLS_DATA).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveSkillTab(tab)}
+                className="btn"
+                style={{
+                  background: activeSkillTab === tab ? 'var(--accent-purple)' : 'rgba(255, 255, 255, 0.03)',
+                  color: activeSkillTab === tab ? '#fff' : 'var(--text-muted)',
+                  border: '1px solid',
+                  borderColor: activeSkillTab === tab ? 'var(--accent-purple)' : 'var(--border-color)',
+                  padding: '0.6rem 1.2rem',
+                  borderRadius: '12px',
+                  fontWeight: '700',
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                {tab === 'frontend' && '💻 Frontend'}
+                {tab === 'backend' && '⚙️ Backend'}
+                {tab === 'mobile' && '📱 Mobile'}
+                {tab === 'devops' && '🛠️ Tools & DevOps'}
+              </button>
+            ))}
+          </div>
+          
+          {/* Skills Grid */}
+          <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.2rem' }}>
+            {SKILLS_DATA[activeSkillTab].map((skill) => (
+              <div key={skill.name} className="card" style={{ minHeight: 'auto', padding: '1.2rem 1.5rem', display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '1.8rem' }}>{skill.icon}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: '800', marginBottom: '0.1rem', color: 'var(--text-main)' }}>{skill.name}</h4>
+                  <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--accent-cyan)' }}>{skill.level}</span>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 
