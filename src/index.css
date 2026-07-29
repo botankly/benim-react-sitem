@@ -226,6 +226,21 @@ body {
   margin: 0 auto;
 }
 
+@keyframes badgeGlow {
+  0% {
+    box-shadow: 0 0 5px rgba(56, 189, 248, 0.1), inset 0 0 5px rgba(56, 189, 248, 0.05);
+    border-color: rgba(56, 189, 248, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.3), inset 0 0 10px rgba(56, 189, 248, 0.1);
+    border-color: rgba(56, 189, 248, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(56, 189, 248, 0.1), inset 0 0 5px rgba(56, 189, 248, 0.05);
+    border-color: rgba(56, 189, 248, 0.15);
+  }
+}
+
 .skill-badge {
   background: rgba(255, 255, 255, 0.03);
   color: var(--accent-cyan);
@@ -235,6 +250,7 @@ body {
   font-weight: 600;
   border: 1px solid rgba(56, 189, 248, 0.15);
   transition: all 0.3s ease;
+  animation: badgeGlow 3s infinite ease-in-out;
 }
 
 .skill-badge:hover {
@@ -242,6 +258,7 @@ body {
   border-color: var(--accent-cyan);
   box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
   transform: translateY(-2px);
+  animation-play-state: paused;
 }
 
 /* Section Title */
@@ -361,9 +378,9 @@ body {
 }
 
 .card:hover {
-  transform: translateY(-8px) scale(1.02); /* hover:scale-105-like smooth transition */
-  border-color: var(--border-hover);
-  box-shadow: var(--shadow-glow), 0 20px 30px rgba(0, 0, 0, 0.4);
+  transform: translateY(-8px) scale(1.02);
+  border-color: rgba(59, 130, 246, 0.5) !important;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.2), 0 20px 30px rgba(0, 0, 0, 0.4);
 }
 
 .card-header {
@@ -1010,9 +1027,9 @@ body {
 }
 
 .ide-window:hover {
-  border-color: rgba(56, 189, 248, 0.25);
-  box-shadow: var(--shadow-glow);
-  transform: translateY(-4px);
+  border-color: rgba(59, 130, 246, 0.5) !important;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.2), 0 20px 30px rgba(0, 0, 0, 0.4);
+  transform: translateY(-8px);
 }
 
 .ide-header {

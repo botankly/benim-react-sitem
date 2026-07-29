@@ -316,6 +316,14 @@ export default function App() {
 
   // Kod Parçacığı Kopyalandı Bildirimi State
   const [copiedId, setCopiedId] = useState(null);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const showToastNotification = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage('');
+    }, 2500);
+  };
 
   const [weatherData, setWeatherData] = useState({
     name: "İstanbul",
@@ -437,12 +445,11 @@ export default function App() {
     setFormStatus('sending');
 
     setTimeout(() => {
-      setFormStatus('success');
+      setFormStatus('idle');
       setFormData({ name: '', email: '', subject: '', message: '' });
-      setTimeout(() => {
-        setFormStatus('idle');
-      }, 3000);
-    }, 1500);
+      setIsContactOpen(false);
+      showToastNotification("Mesajınız başarıyla iletildi!");
+    }, 1200);
   };
 
   // To Do Ekleme
@@ -478,6 +485,7 @@ export default function App() {
   const handleCopy = (id, text) => {
     navigator.clipboard.writeText(text).then(() => {
       setCopiedId(id);
+      showToastNotification("Kod panoya kopyalandı!");
       setTimeout(() => setCopiedId(null), 2000);
     });
   };
@@ -925,7 +933,13 @@ export default function App() {
                   <h3 style={{ fontSize: '1.25rem', marginBottom: '0.6rem' }}>{post.title}</h3>
                   <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: '1.5', marginBottom: '1.2rem' }}>{post.summary}</p>
                 </div>
-                <span className="card-link" style={{ marginTop: 'auto' }}>Makaleyi Oku →</span>
+                <span 
+                  onClick={(e) => { e.stopPropagation(); setIsBlogOpen(true); setSelectedPost(post); }}
+                  className="card-link" 
+                  style={{ marginTop: 'auto', cursor: 'pointer' }}
+                >
+                  Makaleyi Oku →
+                </span>
               </div>
             ))}
           </div>
@@ -938,7 +952,7 @@ export default function App() {
           <div className="github-grid">
             <div className="github-card-wrapper">
               <img 
-                src="https://github-readme-stats.vercel.app/api?username=botankly&show_icons=true&theme=dark&bg_color=151e2f&title_color=38bdf8&icon_color=38bdf8&text_color=94a3b8&border_color=252f44" 
+                src="https://github-readme-stats.vercel.app/api?username=botankly&show_icons=true&theme=tokyonight&hide_border=true" 
                 className="github-card-img" 
                 alt="GitHub İstatistikleri" 
               />
@@ -946,7 +960,7 @@ export default function App() {
             
             <div className="github-card-wrapper">
               <img 
-                src="https://github-readme-stats.vercel.app/api/top-langs/?username=botankly&layout=compact&theme=dark&bg_color=151e2f&title_color=38bdf8&text_color=94a3b8&border_color=252f44" 
+                src="https://github-readme-stats.vercel.app/api/top-langs/?username=botankly&layout=compact&theme=tokyonight&hide_border=true" 
                 className="github-card-img" 
                 alt="En Çok Kullanılan Diller" 
               />
@@ -954,7 +968,7 @@ export default function App() {
             
             <div className="github-card-wrapper">
               <img 
-                src="https://github-readme-streak-stats.herokuapp.com/?user=botankly&theme=dark&background=151e2f&ring=38bdf8&fire=6366f1&currStreakNum=38bdf8&sideNums=94a3b8&sideLabels=94a3b8&dates=94a3b8&border=252f44" 
+                src="https://github-readme-streak-stats.herokuapp.com/?user=botankly&theme=tokyonight&hide_border=true" 
                 className="github-card-img" 
                 alt="GitHub Streak İstatistikleri" 
               />
@@ -1328,6 +1342,30 @@ export default function App() {
 
             <button onClick={() => setIsTrendsepetixOpen(false)} className="btn btn-secondary close-btn">Kapat</button>
           </div>
+        </div>
+      )}
+
+      {toastMessage && (
+        <div style={{
+          position: 'fixed',
+          bottom: '2rem',
+          right: '2rem',
+          background: 'rgba(15, 23, 42, 0.9)',
+          backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(56, 189, 248, 0.4)',
+          color: '#fff',
+          padding: '1rem 1.8rem',
+          borderRadius: '16px',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.2)',
+          fontSize: '0.85rem',
+          fontWeight: '700',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          animation: 'modalEnter 0.3s cubic-bezier(0.165, 0.84, 0.44, 1)'
+        }}>
+          <span style={{ color: '#38bdf8' }}>✔️</span> {toastMessage}
         </div>
       )}
     </>
