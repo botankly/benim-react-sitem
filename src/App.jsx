@@ -295,8 +295,24 @@ export default function App() {
   // Mobil Vitrin Aktif Sekme State (shop, cart, profile)
   const [mobileTab, setMobileTab] = useState('shop');
   
-  // Trendsepetix Mobil Sepet Sayacı
-  const [cartCount, setCartCount] = useState(2);
+  // Trendsepetix Mobil Sepet Verileri
+  const [mobileCart, setMobileCart] = useState([
+    { id: 991, name: 'Slim Fit Gömlek', price: 1174, quantity: 1, image: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500' },
+    { id: 992, name: 'Yün Atkı', price: 518, quantity: 1, image: 'https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=500' }
+  ]);
+  const cartCount = mobileCart.reduce((sum, item) => sum + item.quantity, 0);
+
+  const addMobileCart = (product) => {
+    setMobileCart((prev) => {
+      const existing = prev.find((item) => item.id === product.id);
+      if (existing) {
+        return prev.map((item) =>
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        );
+      }
+      return [...prev, { ...product, quantity: 1 }];
+    });
+  };
 
   // Kod Parçacığı Kopyalandı Bildirimi State
   const [copiedId, setCopiedId] = useState(null);
@@ -603,7 +619,8 @@ export default function App() {
                   <span style={{ fontSize: '9px', padding: '3px 8px', borderRadius: '5px', backgroundColor: 'var(--bg-dark)', color: 'var(--accent-cyan)', border: '1px solid rgba(56, 189, 248, 0.15)' }}>Tailwind CSS</span>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '15px' }}>
+              <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                <a href="#" onClick={(e) => { e.preventDefault(); setIsTrendsepetixOpen(true); }} className="card-link">Detayları Gör →</a>
                 <a href="https://github.com/botankly/Trendsepetix" target="_blank" rel="noopener noreferrer" className="card-link">GitHub →</a>
                 <a href="https://trendsepetix.vercel.app" target="_blank" rel="noopener noreferrer" className="card-link">Canlı Gör →</a>
               </div>
@@ -722,35 +739,30 @@ export default function App() {
                   <div className="phone-body">
                     {mobileTab === 'shop' && (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', animation: 'scaleIn 0.25s ease' }}>
-                        {/* Ürün 1 */}
-                        <div style={{ backgroundColor: '#1e293b', padding: '12px', borderRadius: '14px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <strong style={{ fontSize: '12px', color: '#fff' }}>Kablosuz ANC Kulaklık</strong>
-                            <span style={{ fontSize: '12px', color: 'var(--accent-cyan)', fontWeight: '800' }}>1.299 TL</span>
+                        {[
+                          { id: 991, name: 'Slim Fit Gömlek', price: 1174, image: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500', desc: 'Özel tasarım slim-fit kesim, nefes alan pamuklu kumaş.' },
+                          { id: 992, name: 'Yün Atkı', price: 518, image: 'https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=500', desc: '%100 yün, soğuk kış günleri için sıcak tutan yumuşak doku.' },
+                          { id: 993, name: 'Drone', price: 25807, image: 'https://images.unsplash.com/photo-1508614589041-895b88991e3e?w=500', desc: '4K ultra HD kamera, 30 dakika uçuş süresi ve engel sensörü.' }
+                        ].map(prod => (
+                          <div key={prod.id} style={{ backgroundColor: '#1e293b', padding: '12px', borderRadius: '14px', border: '1px solid var(--border-color)', display: 'flex', gap: '10px', textAlign: 'left' }}>
+                            <div style={{ width: '45px', height: '45px', borderRadius: '10px', overflow: 'hidden', backgroundColor: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2px', flexShrink: 0 }}>
+                              <img src={prod.image} alt={prod.name} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '4px' }}>
+                                <strong style={{ fontSize: '11px', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>{prod.name}</strong>
+                                <span style={{ fontSize: '11px', color: 'var(--accent-cyan)', fontWeight: '800', flexShrink: 0 }}>{prod.price.toLocaleString('tr-TR')} TL</span>
+                              </div>
+                              <p style={{ fontSize: '9px', color: 'var(--text-muted)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{prod.desc}</p>
+                              <button 
+                                onClick={() => addMobileCart(prod)}
+                                style={{ width: '100%', padding: '5px', fontSize: '9.5px', backgroundColor: 'var(--accent-blue)', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '700', marginTop: '4px' }}
+                              >
+                                ➕ Sepete Ekle
+                              </button>
+                            </div>
                           </div>
-                          <p style={{ fontSize: '9.5px', color: 'var(--text-muted)', margin: 0 }}>Gürültü engelleme ve 30 saat pil ömrü.</p>
-                          <button 
-                            onClick={() => setCartCount(c => c + 1)}
-                            style={{ width: '100%', padding: '6px', fontSize: '10px', backgroundColor: 'var(--accent-blue)', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '700' }}
-                          >
-                            ➕ Sepete Ekle
-                          </button>
-                        </div>
-
-                        {/* Ürün 2 */}
-                        <div style={{ backgroundColor: '#1e293b', padding: '12px', borderRadius: '14px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <strong style={{ fontSize: '12px', color: '#fff' }}>Akıllı Saat Pro</strong>
-                            <span style={{ fontSize: '12px', color: 'var(--accent-cyan)', fontWeight: '800' }}>2.499 TL</span>
-                          </div>
-                          <p style={{ fontSize: '9.5px', color: 'var(--text-muted)', margin: 0 }}>AMOLED ekran ve kalp atış hızı takibi.</p>
-                          <button 
-                            onClick={() => setCartCount(c => c + 1)}
-                            style={{ width: '100%', padding: '6px', fontSize: '10px', backgroundColor: 'var(--accent-blue)', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '700' }}
-                          >
-                            ➕ Sepete Ekle
-                          </button>
-                        </div>
+                        ))}
                       </div>
                     )}
 
@@ -758,31 +770,32 @@ export default function App() {
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', animation: 'scaleIn 0.25s ease', textAlign: 'left' }}>
                         <span style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '700' }}>Sepetiniz ({cartCount} Ürün)</span>
                         
-                        {cartCount > 0 ? (
+                        {mobileCart.length > 0 ? (
                           <>
-                            <div style={{ backgroundColor: '#1e293b', padding: '10px 12px', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px' }}>
-                              <div>
-                                <strong style={{ color: '#fff', display: 'block' }}>Kablosuz ANC Kulaklık</strong>
-                                <span style={{ color: 'var(--text-muted)', fontSize: '9px' }}>Miktar: 1 adet</span>
-                              </div>
-                              <span style={{ fontWeight: '700', color: 'var(--accent-cyan)' }}>1.299 TL</span>
-                            </div>
-
-                            <div style={{ backgroundColor: '#1e293b', padding: '10px 12px', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px' }}>
-                              <div>
-                                <strong style={{ color: '#fff', display: 'block' }}>Akıllı Saat Pro</strong>
-                                <span style={{ color: 'var(--text-muted)', fontSize: '9px' }}>Miktar: 1 adet</span>
-                              </div>
-                              <span style={{ fontWeight: '700', color: 'var(--accent-cyan)' }}>2.499 TL</span>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '180px', overflowY: 'auto', paddingRight: '4px' }}>
+                              {mobileCart.map((item) => (
+                                <div key={item.id} style={{ backgroundColor: '#1e293b', padding: '10px 12px', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', gap: '8px' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
+                                    <div style={{ width: '28px', height: '28px', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2px', flexShrink: 0 }}>
+                                      <img src={item.image} alt={item.name} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                                    </div>
+                                    <div style={{ minWidth: 0, flex: 1 }}>
+                                      <strong style={{ color: '#fff', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</strong>
+                                      <span style={{ color: 'var(--text-muted)', fontSize: '9px' }}>Miktar: {item.quantity} adet</span>
+                                    </div>
+                                  </div>
+                                  <span style={{ fontWeight: '700', color: 'var(--accent-cyan)', flexShrink: 0 }}>{(item.price * item.quantity).toLocaleString('tr-TR')} TL</span>
+                                </div>
+                              ))}
                             </div>
 
                             <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '10px', fontSize: '12px', fontWeight: '800' }}>
                               <span style={{ color: 'var(--text-muted)' }}>Toplam:</span>
-                              <span style={{ color: '#fff' }}>3.798 TL</span>
+                              <span style={{ color: '#fff' }}>{mobileCart.reduce((sum, item) => sum + item.price * item.quantity, 0).toLocaleString('tr-TR')} TL</span>
                             </div>
 
                             <button 
-                              onClick={() => { alert('Sipariş Alındı!'); setCartCount(0); }}
+                              onClick={() => { alert('Sipariş Alındı!'); setMobileCart([]); }}
                               style={{ width: '100%', padding: '8px', fontSize: '11px', backgroundColor: '#10b981', color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: '700', marginTop: '4px' }}
                             >
                               💳 Siparişi Tamamla
@@ -1277,33 +1290,33 @@ export default function App() {
           </div>
         </div>
       )}
-
       {/* TRENDSEPETIX WEB MODAL POPUP */}
       {isTrendsepetixOpen && (
         <div className="modal-overlay" onClick={() => setIsTrendsepetixOpen(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
             <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '0.8rem', fontSize: '1.5rem', fontWeight: '800' }}>Trendsepetix</h3>
-            <span className="card-tag" style={{ color: 'var(--accent-purple)' }}>E-Ticaret & Pazaryeri Platformu</span>
+            <span className="card-tag" style={{ color: 'var(--accent-purple)' }}>Veri Madenciliği & AI Karar Destek Paneli</span>
             
             <div style={{ textAlign: 'left', marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.95rem', lineHeight: '1.6' }}>
               <p>
-                <strong>Trendsepetix</strong>, modern bir e-ticaret ve pazaryeri sisteminin sunduğu tüm özellikleri barındıran, yüksek performanslı bir full-stack web uygulamasıdır.
+                <strong>Trendsepetix</strong>, e-ticaret siteleri için müşteri satın alma eğilimlerini (birliktelik analizi), bölgesel satış yoğunluk haritalarını ve mağaza performans grafiklerini analiz eden yapay zeka destekli bir karar destek panelidir.
               </p>
               
               <div>
                 <strong style={{ color: 'var(--accent-cyan)' }}>🔑 Önemli Özellikler:</strong>
                 <ul style={{ paddingLeft: '1.2rem', marginTop: '0.4rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                  <li>📦 <strong>Ürün Listeleme & Filtreleme:</strong> Kategori, marka ve fiyat bazlı anlık filtreleme.</li>
-                  <li>🛒 <strong>Gelişmiş Sepet Mimarisi:</strong> Redux Toolkit ile yönetilen, sayfa yenilense bile korunan sepet mimarisi.</li>
-                  <li>💳 <strong>Sipariş Tamamlama:</strong> Adres yönetimi, kargo seçimi ve mock ödeme entegrasyonu.</li>
-                  <li>🛡️ <strong>Admin Paneli:</strong> Ürün ekleme/düzenleme, kategori yönetimi ve sipariş takibi paneli.</li>
+                  <li>🧠 <strong>AI Birliktelik Analizi (Apriori):</strong> Hangi ürünlerin birlikte satın alındığını tespit eden ve çapraz satış önerileri sunan AI mekanizması.</li>
+                  <li>🗺️ <strong>Bölgesel Satış Isı Haritası:</strong> Semt bazında sipariş yoğunluğunu gerçek zamanlı görselleştiren etkileşimli harita.</li>
+                  <li>📈 <strong>Grafik Analizleri:</strong> Mağazalar arası satış, ciro ve kategori dağılımlarını görsel panellerle sunar.</li>
+                  <li>🏷️ <strong>Dinamik İndirim Stratejisi:</strong> Satış sıklığına göre semt bazlı indirim oranları hesaplar ve simüle eder.</li>
+                  <li>🛒 <strong>İnteraktif Sepet & Simülasyon:</strong> Sepete ürün ekleme, sepet detay modalları ve sipariş simülasyonu özellikleri sunar.</li>
                 </ul>
               </div>
 
               <div>
                 <strong style={{ color: 'var(--accent-cyan)' }}>💻 Mimari & Teknolojiler:</strong>
                 <p style={{ marginTop: '0.2rem', fontSize: '0.9rem' }}>
-                  Frontend tarafında <strong>React</strong> ve <strong>Redux Toolkit</strong> kullanılırken, backend mimarisi <strong>Node.js</strong> ve <strong>Express</strong> üzerine kurulmuştur. Veri akışı tamamen REST API'ler aracılığıyla yönetilmektedir.
+                  Frontend tarafında <strong>React</strong>, <strong>Vite</strong>, <strong>TypeScript</strong> ve <strong>Tailwind CSS</strong> kullanılırken, backend tarafı <strong>Python (Django)</strong> ve <strong>MySQL / db.sqlite3</strong> ile geliştirilmiştir.
                 </p>
               </div>
             </div>
