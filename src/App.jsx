@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import emailjs from '@emailjs/browser';
 import heroImage from './assets/hero.png';
 
 // Türkiye 81 il ve popüler ilçeler/isimler için haritalama
@@ -716,19 +717,36 @@ LinkedIn:  https://linkedin.com`;
     }
   };
 
-  // İletişim Gönderim Simülasyonu
+  // İletişim Gönderim (EmailJS Entegrasyonu)
   const handleContactSubmit = (e) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) return;
 
     setFormStatus('sending');
 
-    setTimeout(() => {
-      setFormStatus('idle');
-      setFormData({ name: '', email: '', subject: '', message: '' });
-      setIsContactOpen(false);
-      showToastNotification("Mesajınız başarıyla iletildi!");
-    }, 1200);
+    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_test';
+    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_test';
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'public_test';
+
+    const templateParams = {
+      from_name: formData.name,
+      reply_to: formData.email,
+      subject: formData.subject || 'Portfolyo İletişim Mesajı',
+      message: formData.message
+    };
+
+    emailjs.send(serviceId, templateId, templateParams, publicKey)
+      .then((response) => {
+        console.log('SUCCESS!', response.status, response.text);
+        setFormStatus('idle');
+        setFormData({ name: '', email: '', subject: '', message: '' });
+        setIsContactOpen(false);
+        showToastNotification("Mesajınız başarıyla iletildi! ✔️");
+      }, (err) => {
+        console.error('FAILED...', err);
+        setFormStatus('idle');
+        showToastNotification("Mesaj gönderilemedi, lütfen tekrar deneyin. ❌");
+      });
   };
 
   // To Do Ekleme
