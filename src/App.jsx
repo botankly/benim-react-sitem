@@ -391,7 +391,7 @@ DevOps:    Git, GitHub, Docker, Vercel, Netlify, npm/yarn`;
       case 'contact':
         output = `E-posta:   botan.kulay@example.com (İletişim modalı üzerinden yazabilirsiniz)
 GitHub:    https://github.com/botankly
-LinkedIn:  https://linkedin.com`;
+LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
         break;
       case 'clear':
         setTerminalHistory([]);
@@ -856,7 +856,7 @@ LinkedIn:  https://linkedin.com`;
               GitHub
             </a>
             <a 
-              href="https://linkedin.com" 
+              href="https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="social-btn linkedin"
