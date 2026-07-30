@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 
 export default function SaaSDashboard() {
@@ -49,34 +48,42 @@ export default function SaaSDashboard() {
     let socket;
     let fallbackInterval;
 
-    try {
-      socket = io('http://localhost:5000', {
-        timeout: 4000,
-        reconnectionAttempts: 1
-      });
+    // Dynamically import socket.io-client so the Vite build doesn't fail
+    // when the package is externalized or not physically installed
+    import('socket.io-client').then(({ io }) => {
+      try {
+        socket = io('http://localhost:5000', {
+          timeout: 4000,
+          reconnectionAttempts: 1
+        });
 
-      socket.on('connect', () => {
-        setSocketStatus('connected');
-      });
+        socket.on('connect', () => {
+          setSocketStatus('connected');
+        });
 
-      socket.on('connect_error', () => {
-        console.warn('Socket.io server connection failed, entering fallback simulation mode.');
+        socket.on('connect_error', () => {
+          console.warn('Socket.io server connection failed, entering fallback simulation mode.');
+          setSocketStatus('fallback');
+          startFallbackSimulation();
+        });
+
+        socket.on('metricsUpdate', (data) => {
+          setMetrics(data);
+        });
+
+        socket.on('newOrder', (order) => {
+          setOrders((prev) => [order, ...prev.slice(0, 19)]);
+        });
+      } catch (e) {
+        console.warn('Socket client creation failed, entering fallback simulation mode.', e);
         setSocketStatus('fallback');
         startFallbackSimulation();
-      });
-
-      socket.on('metricsUpdate', (data) => {
-        setMetrics(data);
-      });
-
-      socket.on('newOrder', (order) => {
-        setOrders((prev) => [order, ...prev.slice(0, 19)]);
-      });
-    } catch (e) {
-      console.warn('Socket client creation failed, entering fallback simulation mode.', e);
+      }
+    }).catch(() => {
+      console.warn('socket.io-client module not available, entering fallback simulation mode.');
       setSocketStatus('fallback');
       startFallbackSimulation();
-    }
+    });
 
     function startFallbackSimulation() {
       let currentRevenue = 42850;

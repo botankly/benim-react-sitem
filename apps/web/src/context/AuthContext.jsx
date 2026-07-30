@@ -134,8 +134,18 @@ export function AuthProvider({ children }) {
     });
   };
 
+  const toggleRole = () => {
+    setUser((prev) => {
+      if (!prev) return null;
+      const newRole = prev.role === 'admin' ? 'user' : 'admin';
+      const updated = { ...prev, role: newRole };
+      localStorage.setItem('auth_user', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, updateSubscriptionPlan }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, updateSubscriptionPlan, toggleRole }}>
       {children}
     </AuthContext.Provider>
   );
