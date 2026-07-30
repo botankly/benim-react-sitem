@@ -8,6 +8,7 @@ import HomeScreen from './src/screens/HomeScreen';
 import ProductDetailScreen from './src/screens/ProductDetailScreen';
 import CartScreen from './src/screens/CartScreen';
 import CheckoutScreen from './src/screens/CheckoutScreen';
+import AdminDashboardScreen from './src/screens/AdminDashboardScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -35,6 +36,7 @@ export default function App() {
           }}
         >
           <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Mağaza' }} />
+          <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} options={{ title: 'Admin Dashboard' }} />
           <Stack.Screen name="ProductDetail" component={ProductDetailScreen} options={{ title: 'Ürün Detayı' }} />
           <Stack.Screen name="Cart" component={CartScreen} options={{ title: 'Sepetim' }} />
           <Stack.Screen name="Checkout" component={CheckoutScreen} options={{ title: 'Ödeme' }} />

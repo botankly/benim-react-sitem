@@ -28,14 +28,19 @@ export default function HomeScreen({ navigation }) {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.logo}>Trendsepetix</Text>
-        <TouchableOpacity style={styles.cartBtn} onPress={() => navigation.navigate('Cart')}>
-          <Text style={styles.cartIcon}>🛒</Text>
-          {cartItemsCount > 0 && (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{cartItemsCount}</Text>
-            </View>
-          )}
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <TouchableOpacity style={{ padding: 8 }} onPress={() => navigation.navigate('AdminDashboard')}>
+            <Text style={{ fontSize: 20 }} title="Admin Dashboard">📊</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.cartBtn} onPress={() => navigation.navigate('Cart')}>
+            <Text style={styles.cartIcon}>🛒</Text>
+            {cartItemsCount > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{cartItemsCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Search Input */}

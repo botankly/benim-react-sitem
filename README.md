@@ -108,6 +108,18 @@ Uygulamanın gelir modelini yönetmek amacıyla Stripe ve Iyzico entegrasyon man
 
 ---
 
+## 📱 Expo Mobil Uygulaması Real-Time & Anlık Bildirim Entegrasyonu
+
+Expo ile geliştirilen mobil uygulama (`apps/mobile`), sistemin canlı veri akışına ve anlık uyarı sistemine bağlanmıştır:
+1. **Mobil Canlı Veri Akışı (WebSocket):** İstemci tarafında `socket.io-client` entegrasyonu ile backend sunucusuna bağlanarak anlık aktif kullanıcı sayısını, CPU ve RAM kullanımlarını ve canlı sipariş cirosunu mobil arayüze gerçek zamanlı yansıtır.
+2. **Push Notification & In-App Alert Simülasyonu:** 
+   - Web panelinden yeni bir sipariş tetiklendiğinde veya kritik bir olay gerçekleştiğinde (Örn: "Yüksek Sunucu Yükü" veya "Yeni Pro Üyelik Satın Alındı"), mobil arayüzde tepeden kayarak inen şık **Anlık Bildirim Banner'ları (Push Alerts)** gösterilir.
+   - Bu bildirimler aynı zamanda mobil ekrandaki **Bildirim Geçmişi** panelinde listelenir.
+3. **Admin Mobile Dashboard Ekranı:** Mobil uygulamanın ana ekranına entegre edilen `📊` butonu ile geçiş yapılabilen bu ekran, karanlık tema uyumlu Glassmorphic kartlar, canlı durum rozetleri, sunucu yük barları ve test simülatör butonları ("Yüksek Yük Simüle Et", "Pro Satış Simüle Et") barındırır.
+4. **Çevrimdışı Mod Toleransı:** Socket sunucusu kapalıyken dahi test edilebilmesi amacıyla, mobil uygulama sunucuya erişemediğinde otomatik olarak yerel mock veri akışını ve bildirim simülasyonunu başlatır.
+
+---
+
 ## 📄 CI/CD ve Test Yapılandırması
 
 Projede kod kalitesini ve kararlılığını korumak için kapsamlı bir CI/CD ve test altyapısı entegre edilmiştir:
