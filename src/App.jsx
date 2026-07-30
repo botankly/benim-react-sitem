@@ -2010,14 +2010,15 @@ LinkedIn:  https://linkedin.com`;
               <div>
                 <strong style={{ color: 'var(--accent-cyan)' }}>💻 Mimari & Teknolojiler:</strong>
                 <p style={{ marginTop: '0.2rem', fontSize: '0.9rem' }}>
-                  Frontend tarafında <strong>React</strong>, <strong>Vite</strong>, <strong>TypeScript</strong> ve <strong>Tailwind CSS</strong> kullanılırken, backend tarafı <strong>Python (Django)</strong> ve <strong>MySQL / db.sqlite3</strong> ile geliştirilmiştir.
+                  Frontend tarafında <strong>React</strong>, <strong>Vite</strong>, <strong>TypeScript</strong> ve <strong>Tailwind CSS</strong> kullanılırken; backend tarafı <strong>Python (Django)</strong> ve <strong>Node.js (Express RESTful API)</strong> mimarileriyle çift çekirdekli geliştirilmiş, <strong>Swagger UI API Dokümantasyonu</strong> ile belgelendirilmiştir.
                 </p>
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '12px', marginTop: '1.8rem', marginBottom: '1rem' }}>
-              <a href="https://trendsepetix.vercel.app" target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ flex: 1, padding: '10px 0', fontSize: '13.5px', textAlign: 'center' }}>Canlı Demo</a>
-              <a href="https://github.com/botankly/Trendsepetix" target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ flex: 1, padding: '10px 0', fontSize: '13.5px', textAlign: 'center' }}>GitHub Deposu</a>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '1.8rem', marginBottom: '1rem' }}>
+              <a href="https://trendsepetix.vercel.app" target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ flex: 1, padding: '10px 0', fontSize: '12px', textAlign: 'center', minWidth: '110px' }}>Canlı Demo</a>
+              <a href="https://github.com/botankly/Trendsepetix" target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ flex: 1, padding: '10px 0', fontSize: '12px', textAlign: 'center', minWidth: '110px' }}>GitHub Web</a>
+              <a href="https://github.com/botankly/benim-react-sitem/tree/main/backend" target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ flex: 1, padding: '10px 0', fontSize: '12px', textAlign: 'center', minWidth: '140px', color: 'var(--accent-cyan)', borderColor: 'var(--accent-cyan)' }}>📄 Backend API Docs</a>
             </div>
 
             <button onClick={() => setIsTrendsepetixOpen(false)} className="btn btn-secondary close-btn">Kapat</button>
