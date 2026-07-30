@@ -288,6 +288,47 @@ const SKILLS_DATA = {
   ]
 };
 
+// Proje Verileri
+const PROJECTS_DATA = [
+  {
+    id: 1,
+    title: "Trendsepetix",
+    category: "Fullstack",
+    tag: "⭐ Öne Çıkan / Fullstack",
+    desc: "AI destekli karar destek mekanizmaları, bölgesel satış ısı haritası ve grafik analizleri içeren e-ticaret veri madenciliği paneli.",
+    technologies: ['React', 'Vite', 'TypeScript', 'Tailwind CSS'],
+    github: "https://github.com/botankly/Trendsepetix",
+    demo: "https://trendsepetix.vercel.app",
+    hasDetails: true,
+    detailAction: 'trendsepetix',
+    featured: true
+  },
+  {
+    id: 2,
+    title: "Hava Durumu Uygulaması",
+    category: "Frontend",
+    tag: "Frontend",
+    desc: "Şehir bazlı detaylı sorgulama yapan, rüzgar hızı ve 3 günlük hava durumu tahmini sunan modern widget uygulaması.",
+    technologies: ['React', 'Vite', 'CSS Modules', 'OpenWeather API'],
+    github: "https://github.com/botankly",
+    demo: "https://benim-react-sitem.vercel.app",
+    hasDetails: true,
+    detailAction: 'weather'
+  },
+  {
+    id: 3,
+    title: "To Do App",
+    category: "Frontend",
+    tag: "Frontend",
+    desc: "Kullanıcı dostu, animasyonlu görev tamamlama süreçleri içeren şık ve hızlı bir yapılacaklar listesi uygulaması.",
+    technologies: ['React', 'CSS', 'LocalStorage', 'Framer Motion'],
+    github: "https://github.com/botankly",
+    demo: "https://benim-react-sitem.vercel.app",
+    hasDetails: true,
+    detailAction: 'todo'
+  }
+];
+
 export default function App() {
   const [isWeatherOpen, setIsWeatherOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
@@ -299,6 +340,16 @@ export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
   const [activeSkillTab, setActiveSkillTab] = useState('frontend');
 
+  // Proje Arama ve Kategori Filtreleme States
+  const [projectSearch, setProjectSearch] = useState('');
+  const [selectedProjectCategory, setSelectedProjectCategory] = useState('Tümü');
+
+  // Yukarı Çık Butonu State
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  // Animasyonlu Sayaç State
+  const [stats, setStats] = useState({ projects: 0, performance: 0 });
+
   useEffect(() => {
     if (theme === 'light') {
       document.body.classList.add('light-theme');
@@ -308,7 +359,58 @@ export default function App() {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
+  // Scroll Listener for Back to Top Button
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 200) {
+        setShowBackToTop(true);
+      } else {
+        setShowBackToTop(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Stats Counter Animation Effect
+  useEffect(() => {
+    let pTimer = setInterval(() => {
+      setStats(prev => {
+        if (prev.projects >= 10) {
+          clearInterval(pTimer);
+          return prev;
+        }
+        return { ...prev, projects: prev.projects + 1 };
+      });
+    }, 100);
+
+    let perfTimer = setInterval(() => {
+      setStats(prev => {
+        if (prev.performance >= 100) {
+          clearInterval(perfTimer);
+          return prev;
+        }
+        const next = prev.performance + 5;
+        return { ...prev, performance: next > 100 ? 100 : next };
+      });
+    }, 40);
+
+    return () => {
+      clearInterval(pTimer);
+      clearInterval(perfTimer);
+    };
+  }, []);
+
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+
+  // Filtrelenmiş Projeler Listesi
+  const filteredProjects = PROJECTS_DATA.filter((project) => {
+    const matchesCategory = selectedProjectCategory === 'Tümü' || project.category === selectedProjectCategory;
+    const matchesSearch = project.title.toLowerCase().includes(projectSearch.toLowerCase()) || 
+                          project.desc.toLowerCase().includes(projectSearch.toLowerCase()) ||
+                          project.technologies.some(tech => tech.toLowerCase().includes(projectSearch.toLowerCase()));
+    return matchesCategory && matchesSearch;
+  });
   
   // Arama Girişi State
   const [cityInput, setCityInput] = useState('');
@@ -643,6 +745,42 @@ export default function App() {
         {/* 3. Hakkımda Bölümü */}
         <section id="hakkimda" className="section" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '5rem' }}>
           <h2 className="section-title">Hakkımda</h2>
+
+          {/* Sayac Bileşeni (Animated Stats Counter) */}
+          <div className="stats-counter-bar animate-fadeIn" style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            gap: '1.5rem',
+            marginBottom: '3rem',
+            width: '100%'
+          }}>
+            <div className="card" style={{ minHeight: 'auto', padding: '1.5rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--accent-purple)', fontFamily: 'monospace' }}>
+                {stats.projects}+
+              </span>
+              <span style={{ fontSize: '0.9rem', fontWeight: '800', color: 'var(--text-main)', marginTop: '0.4rem' }}>
+                Tamamlanan Proje
+              </span>
+            </div>
+            
+            <div className="card" style={{ minHeight: 'auto', padding: '1.5rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--accent-cyan)', fontFamily: 'monospace' }}>
+                {stats.performance}%
+              </span>
+              <span style={{ fontSize: '0.9rem', fontWeight: '800', color: 'var(--text-main)', marginTop: '0.4rem' }}>
+                Temiz Kod & Performans
+              </span>
+            </div>
+
+            <div className="card" style={{ minHeight: 'auto', padding: '1.5rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--accent-blue)', marginTop: '0.6rem', marginBottom: '0.4rem' }}>
+                🎓 Yazılım Müh.
+              </span>
+              <span style={{ fontSize: '0.9rem', fontWeight: '800', color: 'var(--text-main)', marginTop: '0.4rem' }}>
+                Fırat Üniversitesi (Son Sınıf)
+              </span>
+            </div>
+          </div>
           
           <div className="about-container">
             <div className="about-text-card">
@@ -758,57 +896,121 @@ export default function App() {
         <section id="projeler" className="section" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '5rem' }}>
           <h2 className="section-title">Projelerim</h2>
           
-          <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
-            {/* Proje 1: ÖNE ÇIKAN - Trendsepetix */}
-            <div className="card" style={{ borderColor: 'rgba(99, 102, 241, 0.4)', boxShadow: '0 0 15px rgba(99, 102, 241, 0.05)' }}>
-              <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span className="card-tag" style={{ color: 'var(--accent-purple)', fontWeight: '800' }}>⭐ Öne Çıkan / Fullstack</span>
-                <a href="https://github.com/botankly/Trendsepetix" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', transition: 'color 0.2s' }} onMouseOver={(e)=>e.currentTarget.style.color='#fff'} onMouseOut={(e)=>e.currentTarget.style.color='var(--text-muted)'} title="GitHub Deposu">
-                  <svg style={{ width: '20px', height: '20px', fill: 'currentColor' }} viewBox="0 0 24 24">
-                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                  </svg>
-                </a>
-              </div>
-              <div>
-                <h3 style={{ fontSize: '1.35rem', margin: '0.4rem 0' }}>Trendsepetix</h3>
-                <p>AI destekli karar destek mekanizmaları, bölgesel satış ısı haritası ve grafik analizleri içeren e-ticaret veri madenciliği paneli.</p>
-                <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginBottom: '1rem' }}>
-                  <span style={{ fontSize: '9px', padding: '3px 8px', borderRadius: '5px', backgroundColor: 'var(--bg-dark)', color: 'var(--accent-cyan)', border: '1px solid rgba(56, 189, 248, 0.15)' }}>React</span>
-                  <span style={{ fontSize: '9px', padding: '3px 8px', borderRadius: '5px', backgroundColor: 'var(--bg-dark)', color: 'var(--accent-cyan)', border: '1px solid rgba(56, 189, 248, 0.15)' }}>Vite</span>
-                  <span style={{ fontSize: '9px', padding: '3px 8px', borderRadius: '5px', backgroundColor: 'var(--bg-dark)', color: 'var(--accent-cyan)', border: '1px solid rgba(56, 189, 248, 0.15)' }}>TypeScript</span>
-                  <span style={{ fontSize: '9px', padding: '3px 8px', borderRadius: '5px', backgroundColor: 'var(--bg-dark)', color: 'var(--accent-cyan)', border: '1px solid rgba(56, 189, 248, 0.15)' }}>Tailwind CSS</span>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                <a href="#" onClick={(e) => { e.preventDefault(); setIsTrendsepetixOpen(true); }} className="card-link">Detayları Gör →</a>
-                <a href="https://github.com/botankly/Trendsepetix" target="_blank" rel="noopener noreferrer" className="card-link">GitHub →</a>
-                <a href="https://trendsepetix.vercel.app" target="_blank" rel="noopener noreferrer" className="card-link">Canlı Gör →</a>
-              </div>
+          {/* Proje Arama ve Kategori Filtreleme */}
+          <div className="project-filter-bar animate-fadeIn" style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1.2rem',
+            marginBottom: '2.5rem',
+            alignItems: 'center',
+            width: '100%'
+          }}>
+            {/* Arama Kutusu */}
+            <div style={{ position: 'relative', width: '100%', maxWidth: '480px' }}>
+              <input
+                type="text"
+                placeholder="Proje adı veya kullanılan teknoloji ara..."
+                value={projectSearch}
+                onChange={(e) => setProjectSearch(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.8rem 1.2rem',
+                  borderRadius: '14px',
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-card)',
+                  color: 'var(--text-main)',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  outline: 'none',
+                  transition: 'border-color 0.3s'
+                }}
+                className="search-input"
+              />
+              {projectSearch && (
+                <button
+                  onClick={() => setProjectSearch('')}
+                  style={{
+                    position: 'absolute',
+                    right: '1rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text-muted)',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem'
+                  }}
+                >
+                  ✕
+                </button>
+              )}
             </div>
 
-            {/* Proje 2: Hava Durumu Uygulaması */}
-            <div className="card">
-              <div className="card-header">
-                <span className="card-tag">Frontend</span>
-              </div>
-              <div>
-                <h3>Hava Durumu Uygulaması</h3>
-                <p>Şehir bazlı detaylı sorgulama yapan, rüzgar hızı ve 3 günlük hava durumu tahmini sunan modern widget uygulaması.</p>
-              </div>
-              <a href="#" onClick={(e) => { e.preventDefault(); setIsWeatherOpen(true); }} className="card-link">Detayları Gör →</a>
+            {/* Kategori Butonları */}
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+              {['Tümü', 'Frontend', 'Fullstack', 'Mobile'].map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedProjectCategory(cat)}
+                  style={{
+                    background: selectedProjectCategory === cat ? 'var(--accent-cyan)' : 'rgba(255, 255, 255, 0.03)',
+                    color: selectedProjectCategory === cat ? '#000' : 'var(--text-muted)',
+                    border: '1px solid',
+                    borderColor: selectedProjectCategory === cat ? 'var(--accent-cyan)' : 'var(--border-color)',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '10px',
+                    fontWeight: '700',
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
-            
-            {/* Proje 3: To Do App */}
-            <div className="card">
-              <div className="card-header">
-                <span className="card-tag">Frontend</span>
+          </div>
+          
+          <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
+            {filteredProjects.length > 0 ? (
+              filteredProjects.map((project) => (
+                <div key={project.id} className="card" style={project.featured ? { borderColor: 'rgba(99, 102, 241, 0.4)', boxShadow: '0 0 15px rgba(99, 102, 241, 0.05)' } : {}}>
+                  <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span className="card-tag" style={project.featured ? { color: 'var(--accent-purple)', fontWeight: '800' } : {}}>{project.tag}</span>
+                    <a href={project.github} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', transition: 'color 0.2s' }} onMouseOver={(e)=>e.currentTarget.style.color='#fff'} onMouseOut={(e)=>e.currentTarget.style.color='var(--text-muted)'} title="GitHub Deposu">
+                      <svg style={{ width: '20px', height: '20px', fill: 'currentColor' }} viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                      </svg>
+                    </a>
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '1.35rem', margin: '0.4rem 0' }}>{project.title}</h3>
+                    <p>{project.desc}</p>
+                    <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                      {project.technologies.map(tech => (
+                        <span key={tech} style={{ fontSize: '9px', padding: '3px 8px', borderRadius: '5px', backgroundColor: 'var(--bg-dark)', color: 'var(--accent-cyan)', border: '1px solid rgba(56, 189, 248, 0.15)' }}>{tech}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                    {project.hasDetails && (
+                      <a href="#" onClick={(e) => {
+                        e.preventDefault();
+                        if (project.detailAction === 'trendsepetix') setIsTrendsepetixOpen(true);
+                        else if (project.detailAction === 'weather') setIsWeatherOpen(true);
+                        else if (project.detailAction === 'todo') setIsTodoOpen(true);
+                      }} className="card-link">Detayları Gör →</a>
+                    )}
+                    <a href={project.github} target="_blank" rel="noopener noreferrer" className="card-link">GitHub →</a>
+                    <a href={project.demo} target="_blank" rel="noopener noreferrer" className="card-link">Canlı Gör →</a>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem 0', color: 'var(--text-muted)' }}>
+                <p style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>Aranan kriterlere uygun proje bulunamadı.</p>
               </div>
-              <div>
-                <h3>To Do App</h3>
-                <p>Kullanıcı dostu, animasyonlu görev tamamlama süreçleri içeren şık ve hızlı bir yapılacaklar listesi uygulaması.</p>
-              </div>
-              <a href="#" onClick={(e) => { e.preventDefault(); setIsTodoOpen(true); }} className="card-link">Detayları Gör →</a>
-            </div>
+            )}
           </div>
         </section>
 
@@ -1497,10 +1699,40 @@ export default function App() {
         </div>
       )}
 
+      {showBackToTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="back-to-top-btn"
+          style={{
+            position: 'fixed',
+            bottom: '2rem',
+            right: '2rem',
+            width: '46px',
+            height: '46px',
+            borderRadius: '50%',
+            background: 'var(--accent-purple)',
+            border: 'none',
+            color: '#fff',
+            cursor: 'pointer',
+            boxShadow: '0 4px 20px rgba(99, 102, 241, 0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1rem',
+            zIndex: 999,
+            transition: 'all 0.3s ease',
+            animation: 'modalEnter 0.3s cubic-bezier(0.165, 0.84, 0.44, 1)'
+          }}
+          title="Yukarı Çık"
+        >
+          ▲
+        </button>
+      )}
+
       {toastMessage && (
         <div style={{
           position: 'fixed',
-          bottom: '2rem',
+          bottom: '6.2rem',
           right: '2rem',
           background: 'rgba(15, 23, 42, 0.9)',
           backdropFilter: 'blur(12px)',
