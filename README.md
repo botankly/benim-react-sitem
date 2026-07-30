@@ -128,4 +128,76 @@ Projede kod kalitesini ve kararlılığını korumak için kapsamlı bir CI/CD v
 2. **Vitest (Unit Testing):** Hızlı ve yerleşik TypeScript desteği ile frontend ve backend birim testlerini koşturur.
 3. **Playwright (E2E Testing):** Tarayıcı simülasyonu üzerinden tüm kullanıcı deneyimini (tema değişimi, projelerin yüklenmesi vb.) baştan sona test eder.
 
+---
+
+## 🚀 Canlıya Alma Rehberi (Production Deployment Guide)
+
+Proje üç ayrı platforma dağıtılmak üzere yapılandırılmıştır:
+
+### 1️⃣ Supabase / Neon — Ücretsiz PostgreSQL Veritabanı
+
+1. [supabase.com](https://supabase.com) veya [neon.tech](https://neon.tech) adresine gidin ve ücretsiz bir hesap oluşturun.
+2. Yeni bir proje ve veritabanı oluşturun.
+3. **Database → Connection String** bölümünden `postgresql://...` formatındaki bağlantı adresinizi kopyalayın.
+4. Bu adresi `DATABASE_URL` ortam değişkeni olarak Render dashboard'una ekleyeceksiniz.
+
+> Şablonu kopyalamak için: `apps/api/.env.production.example`
+
+### 2️⃣ Render — Node.js API ve Socket.io Servisi
+
+1. [render.com](https://render.com) adresine gidin ve GitHub hesabınızla oturum açın.
+2. **New → Web Service** oluşturun ve `botanikly/benim-react-sitem` reposunu seçin.
+3. Aşağıdaki ayarları uygulayın:
+   - **Root Directory:** `apps/api`
+   - **Build Command:** `npm install && npx prisma generate`
+   - **Start Command:** `node server.js`
+   - **Environment:** `Node`
+4. **Environment Variables** bölümünden şu değerleri ekleyin:
+   ```
+   NODE_ENV=production
+   PORT=5000
+   DATABASE_URL=<supabase/neon bağlantı adresiniz>
+   JWT_SECRET=<güvenli ve rastgele üretilmiş bir gizli anahtar>
+   FRONTEND_URL=<Vercel deploy URL'i — aşağıda oluşturulacak>
+   ```
+5. Deploy işlemi tamamlandığında servis URL'nizi not alın (örn. `https://trendsepetix-api.onrender.com`).
+6. Prisma şemasını uygulamak için Render üzerindeki **Shell** sekmesinden çalıştırın:
+   ```bash
+   npx prisma db push
+   ```
+
+> Render Blueprint dosyası: `render.yaml` (kök dizinde)
+
+### 3️⃣ Vercel — Frontend Web Uygulaması
+
+1. [vercel.com](https://vercel.com) adresine gidin ve GitHub hesabınızla oturum açın.
+2. **New Project → Import Git Repository** adımlarıyla `botanikly/benim-react-sitem` reposunu ekleyin.
+3. Aşağıdaki proje ayarlarını yapılandırın:
+   - **Framework Preset:** Vite
+   - **Root Directory:** `apps/web`
+   - **Build Command:** `npm run build`
+   - **Output Directory:** `dist`
+4. **Environment Variables** bölümünden şu değeri ekleyin:
+   ```
+   VITE_API_URL=https://trendsepetix-api.onrender.com
+   ```
+5. **Deploy** butonuna tıklayın.
+6. Deploy tamamlandıktan sonra Vercel URL'nizi (örn. `https://benim-react-sitem.vercel.app`) kopyalayın ve Render üzerindeki `FRONTEND_URL` değişkenini bu adres ile güncelleyin.
+
+> Vercel konfigürasyon dosyası: `vercel.json` (kök dizinde)
+
+### ⚙️ Ortam Değişkeni Şablonları
+
+| Dosya | Açıklama |
+|---|---|
+| `apps/api/.env.production.example` | API servisi için üretim ortam değişkeni şablonu |
+| `apps/web/.env.production.example` | Web uygulaması için üretim ortam değişkeni şablonu |
+
+### 🔒 Güvenlik Notları
+- `JWT_SECRET` değeri için `openssl rand -base64 64` komutu ile güçlü bir anahtar üretin.
+- `DATABASE_URL` ve `JWT_SECRET` değerlerini asla kaynak koda veya repoya eklemeyin.
+- `.env` dosyaları `.gitignore` kapsamındadır; yalnızca `.env.production.example` şablon dosyaları repoda yer almaktadır.
+
+---
+
 **Botan Külay** tarafından geliştirilmiştir. [GitHub](https://github.com/botankly) | [LinkedIn](https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/)

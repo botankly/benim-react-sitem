@@ -23,7 +23,26 @@ const PORT = process.env.PORT || 5000;
 
 // Security Middlewares
 app.use(helmet());
-app.use(cors());
+
+// Dynamic CORS Configuration
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:5173',
+  'http://localhost:3000'
+].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, postman or curl)
+    if (!origin || allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS block by server policy'));
+    }
+  },
+  credentials: true
+}));
+
 app.use(express.json());
 
 // Rate Limiter
@@ -70,6 +89,11 @@ app.get('/status', (req, res) => {
   res.json({ status: 'Green', message: 'All APIs fully operational.' });
 });
 
+// Health check endpoint (used by Render, Railway, and other platforms)
+app.get('/api/v1/health', (req, res) => {
+  res.json({ status: 'ok', environment: process.env.NODE_ENV || 'development', timestamp: new Date().toISOString() });
+});
+
 // Mount Routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/products', productRoutes);
@@ -85,7 +109,13 @@ app.use(errorHandler);
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
   cors: {
-    origin: '*',
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.indexOf(origin) !== -1 || (origin && origin.endsWith('.vercel.app'))) {
+        callback(null, true);
+      } else {
+        callback(null, true); // Allow all in fallback for mobile clients
+      }
+    },
     methods: ['GET', 'POST']
   }
 });

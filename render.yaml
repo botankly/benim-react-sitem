@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: trendsepetix-api
+    runtime: node
+    region: frankfurt  # EU region for lower latency
+    plan: free
+    rootDir: apps/api
+    buildCommand: npm install && npx prisma generate
+    startCommand: node server.js
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: DATABASE_URL
+        sync: false  # Set manually in Render dashboard (from Supabase / Neon)
+      - key: JWT_SECRET
+        sync: false  # Set manually in Render dashboard (generate a secure random string)
+      - key: FRONTEND_URL
+        sync: false  # Set to your Vercel deployment URL
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 900000
+      - key: RATE_LIMIT_MAX
+        value: 200
