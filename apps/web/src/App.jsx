@@ -3,6 +3,8 @@ import emailjs from '@emailjs/browser';
 import heroImage from './assets/hero.png';
 import Navbar from './components/Navbar';
 import SaaSDashboard from './components/SaaSDashboard';
+import LoginRegister from './components/LoginRegister';
+import { useAuth } from './context/AuthContext';
 
 // Türkiye 81 il ve popüler ilçeler/isimler için haritalama
 const TURKISH_CITIES_MAP = {
@@ -421,6 +423,15 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
   const [activeSkillTab, setActiveSkillTab] = useState('frontend');
   const [currentView, setCurrentView] = useState('portfolio');
 
+  const { user } = useAuth();
+
+  // Redirect to login if dashboard is accessed by unauthenticated users
+  useEffect(() => {
+    if (currentView === 'dashboard' && !user) {
+      setCurrentView('login');
+    }
+  }, [currentView, user]);
+
   // Proje Arama ve Kategori Filtreleme States
   const [projectSearch, setProjectSearch] = useState('');
   const [selectedProjectCategory, setSelectedProjectCategory] = useState('Tümü');
@@ -795,8 +806,10 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
       {/* 1. Navbar & Gezinti */}
       <Navbar theme={theme} toggleTheme={toggleTheme} setIsContactOpen={setIsContactOpen} currentView={currentView} setCurrentView={setCurrentView} />
 
-      {currentView === 'dashboard' ? (
+      {currentView === 'dashboard' && user ? (
         <SaaSDashboard />
+      ) : currentView === 'login' ? (
+        <LoginRegister onAuthSuccess={() => setCurrentView('dashboard')} onBackToPortfolio={() => setCurrentView('portfolio')} />
       ) : (
         <>
           {/* Ana Kapsayıcı */}

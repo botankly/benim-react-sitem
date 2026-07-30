@@ -82,6 +82,18 @@ Projeye entegre edilen 3. ana büyük modül olan **Real-Time SaaS Dashboard**, 
 
 ---
 
+## 🔐 Rol Tabanlı Yetkilendirme (Auth & RBAC)
+
+SaaS Dashboard ve AI Analiz özelliklerini yetkilendirmek amacıyla JWT tabanlı **Kimlik Doğrulama & Yetki Yönetimi (RBAC)** entegre edilmiştir:
+1. **JWT & Kimlik Doğrulama Middleware'i:** Backend tarafında `/api/v1/auth/login`, `/api/v1/auth/register` ve `/api/v1/auth/me` rotaları kurulmuştur. İstemciden gelen istekler `protect` middleware'i ile doğrulanır.
+2. **Korumalı Rotalar (Route Protection):** Yetkisiz kullanıcılar `/dashboard` sayfasına girmek istediklerinde otomatik olarak `/login` sayfasına yönlendirilirler.
+3. **Rol Tabanlı Arayüz Kısıtlamaları (RBAC UI):**
+   - **Yönetici (Admin)** rolündeki kullanıcılar (Örn: `admin@botankulay.com` / `admin123`) sistemin CPU/RAM kaynak kullanım grafiklerini canlı izleyebilir ve AI raporu oluşturabilir.
+   - **Kullanıcı (User)** rolündeki kullanıcılar (Örn: `user@test.com` / `user123`) panelde CPU/RAM metriklerinin kilitli olduğunu (`🔒` simgesi) görür ve AI analiz raporu tetikleme butonuna erişemezler.
+4. **Çevrimdışı Mod Toleransı:** Backend sunucusu kapalıyken dahi testlerin çalışabilmesi için tarayıcıda otomatik local mock kimlik doğrulama mekanizması devreye girer.
+
+---
+
 ## 📄 CI/CD ve Test Yapılandırması
 
 Projede kod kalitesini ve kararlılığını korumak için kapsamlı bir CI/CD ve test altyapısı entegre edilmiştir:

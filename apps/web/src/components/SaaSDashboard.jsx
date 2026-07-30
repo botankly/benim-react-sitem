@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
+import { useAuth } from '../context/AuthContext';
 
 export default function SaaSDashboard() {
+  const { user, token } = useAuth();
+  const isAdmin = user?.role === 'admin';
+
   const [metrics, setMetrics] = useState({
     activeUsers: 120,
     cpuLoad: 28,
@@ -104,6 +108,7 @@ export default function SaaSDashboard() {
   }, []);
 
   const handleGenerateAIReport = async () => {
+    if (!isAdmin) return;
     setGeneratingReport(true);
     setAiReport('');
 
@@ -112,6 +117,7 @@ export default function SaaSDashboard() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ metrics }),
       });
@@ -199,6 +205,27 @@ export default function SaaSDashboard() {
         </div>
       </div>
 
+      {/* Role Alert Badge */}
+      <div style={{
+        padding: '12px 18px',
+        borderRadius: '16px',
+        background: isAdmin ? 'rgba(139, 92, 246, 0.04)' : 'rgba(245, 158, 11, 0.04)',
+        border: isAdmin ? '1px solid rgba(139, 92, 246, 0.15)' : '1px solid rgba(245, 158, 11, 0.15)',
+        fontSize: '0.85rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px'
+      }}>
+        <span>{isAdmin ? '🛡️' : '🔑'}</span>
+        <span>
+          Oturum Açan Rol: **{user?.role === 'admin' ? 'Yönetici (Admin)' : 'Standart Kullanıcı (User)'}**. 
+          {isAdmin 
+            ? ' Tüm sistem kaynaklarına erişiminiz var ve AI Analiz Raporları üretebilirsiniz.' 
+            : ' Sistem kaynakları ve AI Raporlama özellikleri güvenliğiniz için kilitlenmiştir. Yalnızca Admin rolü erişebilir.'
+          }
+        </span>
+      </div>
+
       {/* Metric Cards Grid */}
       <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.2rem' }}>
         
@@ -228,40 +255,60 @@ export default function SaaSDashboard() {
           </div>
         </div>
 
-        {/* CPU Load */}
-        <div className="card animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>CPU Yükü / Processor</span>
-            <h2 style={{ fontSize: '2rem', fontWeight: '800', margin: '0.4rem 0', color: metrics.cpuLoad > 75 ? '#ef4444' : 'var(--text-main)' }}>
-              %{metrics.cpuLoad}
-            </h2>
-          </div>
-          <div style={{ width: '100%', height: '4px', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '2px', overflow: 'hidden' }}>
-            <div style={{
-              width: `${metrics.cpuLoad}%`,
-              height: '100%',
-              backgroundColor: metrics.cpuLoad > 75 ? '#ef4444' : 'var(--accent-cyan)',
-              transition: 'width 0.5s ease-in-out'
-            }} />
-          </div>
+        {/* CPU Load - Restricted */}
+        <div className="card animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative', overflow: 'hidden' }}>
+          {isAdmin ? (
+            <>
+              <div>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>CPU Yükü / Processor</span>
+                <h2 style={{ fontSize: '2rem', fontWeight: '800', margin: '0.4rem 0', color: metrics.cpuLoad > 75 ? '#ef4444' : 'var(--text-main)' }}>
+                  %{metrics.cpuLoad}
+                </h2>
+              </div>
+              <div style={{ width: '100%', height: '4px', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '2px', overflow: 'hidden' }}>
+                <div style={{
+                  width: `${metrics.cpuLoad}%`,
+                  height: '100%',
+                  backgroundColor: metrics.cpuLoad > 75 ? '#ef4444' : 'var(--accent-cyan)',
+                  transition: 'width 0.5s ease-in-out'
+                }} />
+              </div>
+            </>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%', gap: '8px', padding: '10px 0', color: 'var(--text-muted)', textAlign: 'center' }}>
+              <span style={{ fontSize: '1.2rem' }}>🔒</span>
+              <span style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>CPU METRİKLERİ KİLİTLİ</span>
+              <span style={{ fontSize: '0.65rem' }}>(Sadece Admin)</span>
+            </div>
+          )}
         </div>
 
-        {/* RAM Usage */}
-        <div className="card animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>RAM Kullanımı / Memory</span>
-            <h2 style={{ fontSize: '2rem', fontWeight: '800', margin: '0.4rem 0' }}>
-              %{metrics.ramUsage}
-            </h2>
-          </div>
-          <div style={{ width: '100%', height: '4px', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '2px', overflow: 'hidden' }}>
-            <div style={{
-              width: `${metrics.ramUsage}%`,
-              height: '100%',
-              backgroundColor: 'var(--accent-purple)',
-              transition: 'width 0.5s ease-in-out'
-            }} />
-          </div>
+        {/* RAM Usage - Restricted */}
+        <div className="card animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative', overflow: 'hidden' }}>
+          {isAdmin ? (
+            <>
+              <div>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>RAM Kullanımı / Memory</span>
+                <h2 style={{ fontSize: '2rem', fontWeight: '800', margin: '0.4rem 0' }}>
+                  %{metrics.ramUsage}
+                </h2>
+              </div>
+              <div style={{ width: '100%', height: '4px', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '2px', overflow: 'hidden' }}>
+                <div style={{
+                  width: `${metrics.ramUsage}%`,
+                  height: '100%',
+                  backgroundColor: 'var(--accent-purple)',
+                  transition: 'width 0.5s ease-in-out'
+                }} />
+              </div>
+            </>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%', gap: '8px', padding: '10px 0', color: 'var(--text-muted)', textAlign: 'center' }}>
+              <span style={{ fontSize: '1.2rem' }}>🔒</span>
+              <span style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>RAM METRİKLERİ KİLİTLİ</span>
+              <span style={{ fontSize: '0.65rem' }}>(Sadece Admin)</span>
+            </div>
+          )}
         </div>
 
       </div>
@@ -293,28 +340,31 @@ export default function SaaSDashboard() {
         </div>
 
         {/* Right Column: AI Analysis */}
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', minHeight: '400px' }}>
+        <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', minHeight: '400px', position: 'relative' }}>
+          
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: '700', margin: 0 }}>
               AI Rapor Üreticisi / AI Insights
             </h3>
-            <button 
-              onClick={handleGenerateAIReport}
-              disabled={generatingReport}
-              className="btn btn-primary"
-              style={{
-                padding: '6px 14px',
-                fontSize: '0.8rem',
-                borderRadius: '8px',
-                background: generatingReport ? 'var(--border-color)' : 'linear-gradient(135deg, var(--accent-purple), var(--accent-cyan))',
-                color: '#fff',
-                cursor: generatingReport ? 'not-allowed' : 'pointer',
-                fontWeight: 'bold',
-                border: 'none'
-              }}
-            >
-              {generatingReport ? 'Analiz Ediliyor...' : 'AI Raporu Üret ✨'}
-            </button>
+            {isAdmin && (
+              <button 
+                onClick={handleGenerateAIReport}
+                disabled={generatingReport}
+                className="btn btn-primary"
+                style={{
+                  padding: '6px 14px',
+                  fontSize: '0.8rem',
+                  borderRadius: '8px',
+                  background: generatingReport ? 'var(--border-color)' : 'linear-gradient(135deg, var(--accent-purple), var(--accent-cyan))',
+                  color: '#fff',
+                  cursor: generatingReport ? 'not-allowed' : 'pointer',
+                  fontWeight: 'bold',
+                  border: 'none'
+                }}
+              >
+                {generatingReport ? 'Analiz Ediliyor...' : 'AI Raporu Üret ✨'}
+              </button>
+            )}
           </div>
 
           <div style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'rgba(0, 0, 0, 0.2)', border: '1px solid var(--border-color)', overflowY: 'auto', maxHeight: '300px', fontSize: '0.85rem', lineHeight: '1.6' }}>
@@ -328,6 +378,14 @@ export default function SaaSDashboard() {
                   }
                 `}} />
                 <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Botan-AI verileri analiz ediyor...</span>
+              </div>
+            ) : !isAdmin ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '220px', color: 'var(--text-muted)', textAlign: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '2rem' }}>🔒</span>
+                <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>AI YÖNETİCİ ANALİZİ KİLİTLİ</span>
+                <p style={{ margin: 0, fontSize: '0.75rem', maxWidth: '280px', color: 'var(--text-muted)' }}>
+                  Yalnızca **Yönetici (Admin)** rolüne sahip kullanıcılar bu alandan AI Raporu oluşturma yetkisine sahiptir.
+                </p>
               </div>
             ) : aiReport ? (
               <div style={{ whiteSpace: 'pre-line' }}>
