@@ -973,6 +973,13 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
     }
   }, [isWeatherOpen]);
 
+  // Sayfa ilk yüklendiğinde canlı varsayılan hava durumunu çek (İstanbul)
+  useEffect(() => {
+    fetchFullWeatherData(41.0082, 28.9784, 'İstanbul').then((data) => {
+      setWeatherData(prev => ({ ...prev, ...data }));
+    }).catch(err => console.error("Initial weather fetch error:", err));
+  }, []);
+
   // To Do LocalStorage Senkronizasyonu
   useEffect(() => {
     localStorage.setItem('todos', JSON.stringify(todos));
