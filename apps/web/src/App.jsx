@@ -430,20 +430,20 @@ const PROJECTS_DATA = [
     title: "Hava Durumu Uygulaması",
     category: "Frontend",
     tag: "Frontend",
-    desc: "Şehir bazlı detaylı sorgulama yapan, rüzgar hızı ve 3 günlük hava durumu tahmini sunan modern widget uygulaması.",
-    technologies: ['React', 'Vite', 'CSS Modules', 'OpenWeather API'],
+    desc: "Canlı Open-Meteo API, Geolocation, 24 saatlik çizgi grafiği ve AQI/UV indeksleri içeren profesyonel meteoroloji paneli.",
+    technologies: ['React 19', 'Vite', 'Open-Meteo API', 'Geolocation API', 'SVG Line Chart'],
     github: "https://github.com/botankly",
     demo: "https://benim-react-sitem.vercel.app",
     hasDetails: true,
     detailAction: 'weather',
-    problem: "Kullanıcıların hızlı ve görsel olarak zengin hava durumu bilgisine tek sayfadan ulaşabilmesi için tasarlandı.",
+    problem: "Kullanıcıların canlı ve doğru hava durumu verilerine (sıcaklık, nem, AQI, UV, saatlik değişim) konum bazlı anında ulaşmasını sağlamak.",
     highlights: [
-      "OpenWeatherMap API ile anlık şehir bazlı sorgulama",
-      "Rüzgar hızı, nem ve UV endeksi gibi detaylı metrik gösterimi",
-      "3 günlük tahmin kartları ve animasyonlu ikon seti",
-      "CSS Modules ile izole ve performanslı stil mimarisi"
+      "Canlı Open-Meteo REST API & Air Quality API entegrasyonu (Sıfır sahte veri)",
+      "Geolocation API ile otomatik konum algılama (📍 GPS)",
+      "24 saatlik sıcaklık değişim grafiği (Custom SVG Line Chart)",
+      "°C / °F Birim dönüştürücüsü ve LocalStorage destekli arama geçmişi"
     ],
-    arch: "React 19 · Vite · OpenWeather API · CSS Modules · Vercel Deployment"
+    arch: "React 19 · Open-Meteo REST API · Air Quality API · Geolocation API · Custom SVG Chart"
   },
   {
     id: 3,
