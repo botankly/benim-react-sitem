@@ -335,6 +335,74 @@ export default function App() {
   const [isTodoOpen, setIsTodoOpen] = useState(false);
   const [isBlogOpen, setIsBlogOpen] = useState(false);
   const [isTrendsepetixOpen, setIsTrendsepetixOpen] = useState(false);
+  const [isCvOpen, setIsCvOpen] = useState(false);
+
+  // Terminal States & Handler
+  const [terminalInput, setTerminalInput] = useState('');
+  const [terminalHistory, setTerminalHistory] = useState([]);
+
+  const handleTerminalSubmit = (e) => {
+    e.preventDefault();
+    const cmd = terminalInput.trim().toLowerCase();
+    if (!cmd) return;
+
+    let output = '';
+    let type = 'info';
+
+    switch (cmd) {
+      case 'help':
+        output = `Kullanılabilecek komutlar:
+  about    - Botan Külay hakkında özet bilgi
+  skills   - Yetenek havuzunu listeler
+  projects - Geliştirilen projelerin linkleri
+  contact  - İletişim & sosyal ağ bilgileri
+  clear    - Ekranı temizler`;
+        type = 'success';
+        break;
+      case 'about':
+        output = `Botan Külay
+Fırat Üniversitesi Yazılım Mühendisliği son sınıf öğrencisiyim. 
+Modern web (React, Node.js) ve mobil (React Native) geliştirme teknolojileri ile
+kullanıcı dostu, performanslı çözümler üretiyorum.`;
+        break;
+      case 'skills':
+        output = `Frontend:  React, Vite, TypeScript, Tailwind CSS, Next.js, HTML5, CSS3
+Backend:   Node.js, Python (Django), MySQL, SQLite, REST APIs
+Mobile:    React Native, Expo, Android Studio
+DevOps:    Git, GitHub, Docker, Vercel, Netlify, npm/yarn`;
+        type = 'success';
+        break;
+      case 'projects':
+        output = `• Trendsepetix (AI & E-Ticaret Veri Paneli) -> https://trendsepetix.vercel.app
+• Hava Durumu Uygulaması -> https://benim-react-sitem.vercel.app
+• To Do App (Yapılacaklar Paneli) -> https://benim-react-sitem.vercel.app`;
+        type = 'success';
+        break;
+      case 'contact':
+        output = `E-posta:   botan.kulay@example.com (İletişim modalı üzerinden yazabilirsiniz)
+GitHub:    https://github.com/botankly
+LinkedIn:  https://linkedin.com`;
+        break;
+      case 'clear':
+        setTerminalHistory([]);
+        setTerminalInput('');
+        return;
+      default:
+        output = `Komut bulunamadı: '${cmd}'. Kullanılabilir tüm komutlar için 'help' yazın.`;
+        type = 'error';
+    }
+
+    setTerminalHistory(prev => [...prev, { command: terminalInput, output, type }]);
+    setTerminalInput('');
+
+    // Auto scroll to bottom
+    setTimeout(() => {
+      const container = document.querySelector('.terminal-body');
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }, 50);
+  };
   
   // Tema ve Yetenek Sekmesi States
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
@@ -714,20 +782,22 @@ export default function App() {
               </svg>
               LinkedIn
             </a>
-            <a 
-              href="/cv.pdf" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              download="Botan_Kulay_CV.pdf"
+            <button 
+              onClick={() => setIsCvOpen(true)}
               className="social-btn cv"
+              style={{
+                border: 'none',
+                cursor: 'pointer',
+                background: 'rgba(255, 255, 255, 0.03)'
+              }}
             >
               <svg style={{ width: '18px', height: '18px', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' }} viewBox="0 0 24 24">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="7 10 12 15 17 10"></polyline>
                 <line x1="12" y1="15" x2="12" y2="3"></line>
               </svg>
-              CV İndir
-            </a>
+              CV Önizle / İndir
+            </button>
           </div>
           
           {/* Teknolojiler */}
@@ -1299,6 +1369,103 @@ export default function App() {
           </div>
         </section>
 
+        {/* Botan-CLI Terminal Bölümü */}
+        <section id="terminal-section" className="section" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '5rem' }}>
+          <h2 className="section-title">Botan-CLI Terminal</h2>
+          
+          <div className="card" style={{
+            background: '#090d16',
+            borderColor: '#0f1f38',
+            padding: 0,
+            borderRadius: '16px',
+            overflow: 'hidden',
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)',
+            fontFamily: '"Fira Code", "Courier New", Courier, monospace',
+            display: 'flex',
+            flexDirection: 'column',
+            height: '350px',
+            textAlign: 'left'
+          }}>
+            {/* Terminal Header */}
+            <div style={{
+              background: '#0f172a',
+              padding: '0.8rem 1.2rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
+            }}>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ef4444', display: 'inline-block' }}></span>
+                <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#f59e0b', display: 'inline-block' }}></span>
+                <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#22c55e', display: 'inline-block' }}></span>
+              </div>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>botan@kulay-pc: ~</span>
+              <span style={{ width: '40px' }}></span>
+            </div>
+            
+            {/* Terminal Body */}
+            <div 
+              className="terminal-body"
+              style={{
+                flex: 1,
+                padding: '1.2rem',
+                overflowY: 'auto',
+                color: '#22c55e',
+                fontSize: '0.85rem',
+                lineHeight: '1.5',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px'
+              }}
+              onClick={() => document.getElementById('terminal-input')?.focus()}
+            >
+              <div>Botan-CLI [Version 1.0.0]</div>
+              <div>Yardım ve tüm komutlar için <strong style={{ color: '#fff' }}>'help'</strong> yazıp Enter'a basın.</div>
+              <div style={{ borderBottom: '1px dashed rgba(34, 197, 94, 0.2)', margin: '4px 0 10px 0' }}></div>
+              
+              {terminalHistory.map((item, idx) => (
+                <div key={idx}>
+                  <div style={{ color: '#38bdf8', fontWeight: 'bold' }}>
+                    <span>$ </span>
+                    <span style={{ color: '#fff' }}>{item.command}</span>
+                  </div>
+                  <div style={{ 
+                    whiteSpace: 'pre-wrap', 
+                    color: item.type === 'error' ? '#f87171' : item.type === 'success' ? '#22c55e' : '#a7f3d0',
+                    marginTop: '2px',
+                    marginBottom: '8px'
+                  }}>
+                    {item.output}
+                  </div>
+                </div>
+              ))}
+
+              <form onSubmit={handleTerminalSubmit} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: 'auto' }}>
+                <span style={{ color: '#38bdf8', fontWeight: 'bold' }}>$</span>
+                <input
+                  id="terminal-input"
+                  type="text"
+                  value={terminalInput}
+                  onChange={(e) => setTerminalInput(e.target.value)}
+                  autoComplete="off"
+                  style={{
+                    flex: 1,
+                    background: 'none',
+                    border: 'none',
+                    outline: 'none',
+                    color: '#fff',
+                    fontFamily: 'inherit',
+                    fontSize: 'inherit',
+                    padding: 0
+                  }}
+                  placeholder="Komut yazın..."
+                />
+              </form>
+            </div>
+          </div>
+        </section>
+
         {/* 8. GitHub Aktivite Bölümü */}
         <section id="github-activity" className="section" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '5rem' }}>
           <h2 className="section-title">GitHub Aktivitem</h2>
@@ -1727,6 +1894,31 @@ export default function App() {
         >
           ▲
         </button>
+      )}
+
+      {isCvOpen && (
+        <div className="modal-overlay" onClick={() => setIsCvOpen(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '800px', width: '90%', height: '85vh', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '10px' }}>
+              <h3 style={{ color: 'var(--accent-cyan)', fontSize: '1.4rem', fontWeight: '800', margin: 0 }}>Özgeçmiş Önizleme</h3>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <a href="/cv.pdf" download="Botan_Kulay_CV.pdf" className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}>
+                  📥 İndir (PDF)
+                </a>
+                <button onClick={() => setIsCvOpen(false)} className="btn btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>Kapat</button>
+              </div>
+            </div>
+            <div style={{ flex: 1, width: '100%', background: '#fff', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
+              <iframe
+                src="/cv.pdf"
+                title="Botan Külay CV"
+                width="100%"
+                height="100%"
+                style={{ border: 'none' }}
+              ></iframe>
+            </div>
+          </div>
+        </div>
       )}
 
       {toastMessage && (
