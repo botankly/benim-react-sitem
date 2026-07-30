@@ -9,14 +9,16 @@ export const users = [
     name: 'Botan Admin',
     email: 'admin@botankulay.com',
     password: adminPassword,
-    role: 'admin'
+    role: 'admin',
+    subscriptionPlan: 'enterprise'
   },
   {
     id: '2',
     name: 'Test User',
     email: 'user@test.com',
     password: userPassword,
-    role: 'user'
+    role: 'user',
+    subscriptionPlan: 'free'
   }
 ];
 export const products = [
@@ -26,3 +28,4 @@ export const products = [
 ];
 export const orders = [];
 export const reviews = [];
+export const invoices = [];

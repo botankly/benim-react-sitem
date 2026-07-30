@@ -13,6 +13,7 @@ import productRoutes from './routes/productRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
+import billingRoutes from './routes/billingRoutes.js';
 import { errorHandler } from './middleware/errorMiddleware.js';
 
 dotenv.config();
@@ -75,6 +76,7 @@ app.use('/api/v1/products', productRoutes);
 app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/reviews', reviewRoutes);
 app.use('/api/v1/ai', aiRoutes);
+app.use('/api/v1/billing', billingRoutes);
 
 // Error Handling Middleware
 app.use(errorHandler);

@@ -94,6 +94,20 @@ SaaS Dashboard ve AI Analiz özelliklerini yetkilendirmek amacıyla JWT tabanlı
 
 ---
 
+## 💳 SaaS Ödeme Altyapısı ve Abonelik Yönetimi (Stripe / Iyzico Sandbox)
+
+Uygulamanın gelir modelini yönetmek amacıyla Stripe ve Iyzico entegrasyon mantığına dayanan tam teşekküllü **Abonelik ve Ödeme Sistemi** entegre edilmiştir:
+1. **Abonelik Planları Uç Noktası (`/api/v1/billing/plans`):**
+   - **Free Plan ($0/ay):** 100 günlük istek limiti, temel analitik arayüzü.
+   - **Pro Plan ($29/ay):** Sınırsız istek, real-time websockets, AI analiz raporları, özel destek.
+   - **Enterprise Plan ($99/ay):** Tüm özellikler, 24/7 telefon desteği, %99.9 SLA garantisi.
+2. **Ödeme Başlatma ve Simülasyonu (`/api/v1/billing/checkout`):** Stripe/Iyzico Checkout Session mekanizmasını taklit eder. Kullanıcı kredi kartı bilgilerini girip "Ödemeyi Tamamla" butonuna bastığında API üzerinden sandbox ödemesi gerçekleştirilir ve kullanıcının abonelik planı anında yükseltilir.
+3. **Webhook İşleyicisi (`/api/v1/billing/webhook`):** Ödeme sağlayıcılarından (Stripe/Iyzico) gelen anlık başarılı/başarısız durum bildirimlerini dinler ve işler.
+4. **Fatura Geçmişi (`/api/v1/billing/history`):** Kullanıcının geçmiş ödemelerini, tutarını, tarihini ve kullanılan kart maskesini listeler. Arayüzden faturalar PDF formatında (simüle edilerek) indirilebilir.
+5. **Dinamik Yetki Aktivasyonu (Feature Flagging):** Standart bir kullanıcı hesabını Pro veya Enterprise plana yükselttiğinde, dashboard üzerindeki CPU/RAM altyapı metriklerinin kilidi (`🔒`) otomatik olarak açılır ve AI analiz raporu üretme özelliği aktif hale gelir.
+
+---
+
 ## 📄 CI/CD ve Test Yapılandırması
 
 Projede kod kalitesini ve kararlılığını korumak için kapsamlı bir CI/CD ve test altyapısı entegre edilmiştir:
