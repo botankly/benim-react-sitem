@@ -315,7 +315,15 @@ const PROJECTS_DATA = [
     demo: "https://trendsepetix.vercel.app",
     hasDetails: true,
     detailAction: 'trendsepetix',
-    featured: true
+    featured: true,
+    problem: "Geleneksel e-ticaret panelleri ham veriyi yöneticiye sunarken; anlamlı içgörü, satış trendi ve bölgesel performans analizi sunmaz. Trendsepetix bu boşluğu kapatmak için geliştirildi.",
+    highlights: [
+      "Gerçek zamanlı Socket.io entegrasyonu ile anlık sipariş ve kullanıcı akışı takibi",
+      "AI rapor üreticisi ile tek tık'ta Türkçe/İngilizce yönetici özeti çıkarma",
+      "JWT tabanlı Rol Yönetimi (Admin/User) ve korumalı route mimarisi",
+      "Stripe/Iyzico Sandbox ile abonelik planı simülasyonu (Free/Pro/Enterprise)"
+    ],
+    arch: "Monorepo (Turborepo) · React 19 + Vite Frontend · Node.js + Express API · Socket.io · Prisma ORM · PostgreSQL"
   },
   {
     id: 2,
@@ -327,7 +335,15 @@ const PROJECTS_DATA = [
     github: "https://github.com/botankly",
     demo: "https://benim-react-sitem.vercel.app",
     hasDetails: true,
-    detailAction: 'weather'
+    detailAction: 'weather',
+    problem: "Kullanıcıların hızlı ve görsel olarak zengin hava durumu bilgisine tek sayfadan ulaşabilmesi için tasarlandı.",
+    highlights: [
+      "OpenWeatherMap API ile anlık şehir bazlı sorgulama",
+      "Rüzgar hızı, nem ve UV endeksi gibi detaylı metrik gösterimi",
+      "3 günlük tahmin kartları ve animasyonlu ikon seti",
+      "CSS Modules ile izole ve performanslı stil mimarisi"
+    ],
+    arch: "React 19 · Vite · OpenWeather API · CSS Modules · Vercel Deployment"
   },
   {
     id: 3,
@@ -339,7 +355,15 @@ const PROJECTS_DATA = [
     github: "https://github.com/botankly",
     demo: "https://benim-react-sitem.vercel.app",
     hasDetails: true,
-    detailAction: 'todo'
+    detailAction: 'todo',
+    problem: "Sade ama estetik bir görev yönetimi aracına duyulan ihtiyaçtan doğdu; backend bağımlılığı olmadan kalıcı veri saklama.",
+    highlights: [
+      "LocalStorage tabanlı kalıcı görev kaydı (sayfa yenileme sonrası kayıp yok)",
+      "Tümü / Aktif / Tamamlanan filtre sekmeleri",
+      "Framer Motion ile akıcı ekleme/silme animasyonları",
+      "Karanlık/Aydınlık tema uyumlu tam responsive tasarım"
+    ],
+    arch: "React 19 · CSS3 · LocalStorage API · Framer Motion · Vite"
   }
 ];
 
@@ -350,6 +374,7 @@ export default function App() {
   const [isBlogOpen, setIsBlogOpen] = useState(false);
   const [isTrendsepetixOpen, setIsTrendsepetixOpen] = useState(false);
   const [isCvOpen, setIsCvOpen] = useState(false);
+  const [selectedProjectModal, setSelectedProjectModal] = useState(null);
 
   // Terminal States & Handler
   const [terminalInput, setTerminalInput] = useState('');
@@ -518,6 +543,17 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Keyboard ESC Listener for Modal Closing
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (selectedProjectModal) setSelectedProjectModal(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedProjectModal]);
 
   // Stats Counter Animation Effect
   useEffect(() => {
@@ -1045,7 +1081,7 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
             alignItems: 'center',
             width: '100%'
           }}>
-            {/* Arama Kutusu */}
+            {/* Arama Kutusu & Etiket Filtre Temizleme */}
             <div style={{ position: 'relative', width: '100%', maxWidth: '480px' }}>
               <input
                 type="text"
@@ -1055,8 +1091,9 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
                 style={{
                   width: '100%',
                   padding: '0.8rem 1.2rem',
+                  paddingRight: projectSearch ? '6rem' : '1.2rem',
                   borderRadius: '14px',
-                  border: '1px solid var(--border-color)',
+                  border: projectSearch ? '1px solid var(--accent-cyan)' : '1px solid var(--border-color)',
                   background: 'var(--bg-card)',
                   color: 'var(--text-main)',
                   fontSize: '0.9rem',
@@ -1071,20 +1108,57 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
                   onClick={() => setProjectSearch('')}
                   style={{
                     position: 'absolute',
-                    right: '1rem',
+                    right: '0.6rem',
                     top: '50%',
                     transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--text-muted)',
+                    background: 'rgba(239, 68, 68, 0.15)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    borderRadius: '8px',
+                    color: '#ef4444',
                     cursor: 'pointer',
-                    fontSize: '0.9rem'
+                    fontSize: '0.75rem',
+                    fontWeight: '800',
+                    padding: '4px 10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    transition: 'all 0.2s ease'
                   }}
+                  title="Filtreyi Temizle"
+                  onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.3)'; }}
+                  onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; }}
                 >
-                  ✕
+                  Temizle ✕
                 </button>
               )}
             </div>
+
+            {/* Seçili Etiket Göstergesi */}
+            {projectSearch && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                <span>Aktif Filtre:</span>
+                <span style={{
+                  padding: '4px 12px',
+                  borderRadius: '8px',
+                  backgroundColor: 'rgba(56, 189, 248, 0.15)',
+                  color: 'var(--accent-cyan)',
+                  border: '1px solid rgba(56, 189, 248, 0.3)',
+                  fontWeight: '700',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}>
+                  🏷️ {projectSearch}
+                  <button 
+                    onClick={() => setProjectSearch('')} 
+                    style={{ background: 'none', border: 'none', color: 'var(--accent-cyan)', cursor: 'pointer', fontWeight: 'bold', padding: 0, fontSize: '0.85rem' }}
+                    title="Filtreyi Kaldır"
+                  >
+                    ✕
+                  </button>
+                </span>
+              </div>
+            )}
 
             {/* Kategori Butonları */}
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
@@ -1128,7 +1202,22 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
                     <p>{project.desc}</p>
                     <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginBottom: '1rem' }}>
                       {project.technologies.map(tech => (
-                        <span key={tech} style={{ fontSize: '9px', padding: '3px 8px', borderRadius: '5px', backgroundColor: 'var(--bg-dark)', color: 'var(--accent-cyan)', border: '1px solid rgba(56, 189, 248, 0.15)' }}>{tech}</span>
+                        <span
+                          key={tech}
+                          onClick={() => setProjectSearch(tech)}
+                          title={`"${tech}" ile filtrele`}
+                          style={{
+                            fontSize: '9px', padding: '3px 8px', borderRadius: '5px',
+                            backgroundColor: projectSearch === tech ? 'rgba(56,189,248,0.18)' : 'var(--bg-dark)',
+                            color: projectSearch === tech ? '#fff' : 'var(--accent-cyan)',
+                            border: projectSearch === tech ? '1px solid rgba(56,189,248,0.6)' : '1px solid rgba(56, 189, 248, 0.15)',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            userSelect: 'none'
+                          }}
+                          onMouseOver={(e) => { e.currentTarget.style.opacity = '0.75'; }}
+                          onMouseOut={(e) => { e.currentTarget.style.opacity = '1'; }}
+                        >{tech}</span>
                       ))}
                     </div>
                   </div>
@@ -1136,9 +1225,7 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
                     {project.hasDetails && (
                       <a href="#" onClick={(e) => {
                         e.preventDefault();
-                        if (project.detailAction === 'trendsepetix') setIsTrendsepetixOpen(true);
-                        else if (project.detailAction === 'weather') setIsWeatherOpen(true);
-                        else if (project.detailAction === 'todo') setIsTodoOpen(true);
+                        setSelectedProjectModal(project);
                       }} className="card-link">Detayları Gör →</a>
                     )}
                     <a href={project.github} target="_blank" rel="noopener noreferrer" className="card-link">GitHub →</a>
@@ -2060,6 +2147,165 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
                 height="100%"
                 style={{ border: 'none' }}
               ></iframe>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Proje Detay Modalı (Interactive Project Modal) */}
+      {selectedProjectModal && (
+        <div className="modal-overlay" onClick={() => setSelectedProjectModal(null)}>
+          <div 
+            className="modal-content" 
+            onClick={(e) => e.stopPropagation()} 
+            style={{ 
+              maxWidth: '620px', 
+              width: '92%', 
+              textAlign: 'left', 
+              padding: '2.2rem',
+              borderRadius: '24px',
+              border: '1px solid var(--border-color)',
+              background: 'var(--bg-modal)',
+              position: 'relative',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)'
+            }}
+          >
+            {/* Kapat X Butonu */}
+            <button
+              onClick={() => setSelectedProjectModal(null)}
+              style={{
+                position: 'absolute',
+                top: '1.2rem',
+                right: '1.2rem',
+                background: 'rgba(255, 255, 255, 0.06)',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-muted)',
+                borderRadius: '50%',
+                width: '36px',
+                height: '36px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseOver={(e) => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(239, 68, 68, 0.25)'; }}
+              onMouseOut={(e) => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)'; }}
+              title="Kapat (ESC)"
+            >
+              ✕
+            </button>
+
+            {/* Üst Bilgi / Etiket & Kategori */}
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '0.8rem', flexWrap: 'wrap' }}>
+              <span className="card-tag" style={{ color: selectedProjectModal.featured ? 'var(--accent-purple)' : 'var(--accent-cyan)', fontWeight: '800', fontSize: '0.85rem' }}>
+                {selectedProjectModal.tag}
+              </span>
+              <span style={{ fontSize: '0.75rem', padding: '2px 10px', borderRadius: '6px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-color)', fontWeight: '600' }}>
+                {selectedProjectModal.category}
+              </span>
+            </div>
+
+            {/* Proje Başlığı */}
+            <h3 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.8rem', lineHeight: '1.2' }}>
+              {selectedProjectModal.title}
+            </h3>
+
+            {/* Kullanılan Teknolojiler (Detaylı Rozetler) */}
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '1.4rem' }}>
+              {selectedProjectModal.technologies.map(tech => (
+                <span
+                  key={tech}
+                  style={{
+                    fontSize: '11px',
+                    padding: '4px 10px',
+                    borderRadius: '8px',
+                    backgroundColor: 'rgba(56, 189, 248, 0.12)',
+                    color: 'var(--accent-cyan)',
+                    border: '1px solid rgba(56, 189, 248, 0.3)',
+                    fontWeight: '700'
+                  }}
+                >
+                  {tech}
+                </span>
+              ))}
+            </div>
+
+            {/* Mimari / Teknik Şema Placeholder Görsel Alanı */}
+            <div style={{
+              width: '100%',
+              padding: '1.4rem 1.6rem',
+              borderRadius: '16px',
+              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.8))',
+              border: '1px solid rgba(56, 189, 248, 0.25)',
+              marginBottom: '1.4rem',
+              boxShadow: 'inset 0 0 20px rgba(0,0,0,0.3)'
+            }}>
+              <div style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--accent-cyan)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>⚡ MİMARİ & TEKNİK YAPI</span>
+              </div>
+              <p style={{ fontSize: '0.88rem', color: '#e2e8f0', margin: 0, fontFamily: 'monospace', lineHeight: '1.5' }}>
+                {selectedProjectModal.arch || "React 19 · Vite · Tailwind CSS · REST API"}
+              </p>
+            </div>
+
+            {/* Projenin Amacı ve Çözdüğü Problem */}
+            {selectedProjectModal.problem && (
+              <div style={{ marginBottom: '1.2rem' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  🎯 Projenin Amacı ve Çözümü
+                </h4>
+                <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: '1.6', margin: 0 }}>
+                  {selectedProjectModal.problem}
+                </p>
+              </div>
+            )}
+
+            {/* Öne Çıkan Teknik Özellikler (3-4 Maddelik Liste) */}
+            {selectedProjectModal.highlights && selectedProjectModal.highlights.length > 0 && (
+              <div style={{ marginBottom: '1.8rem' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  ✨ Öne Çıkan Teknik Özellikler
+                </h4>
+                <ul style={{ margin: 0, paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {selectedProjectModal.highlights.map((item, idx) => (
+                    <li key={idx} style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.5' }}>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Bağlantı Butonları: Canlı Gör & GitHub */}
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', paddingTop: '1.2rem', borderTop: '1px solid var(--border-color)' }}>
+              {selectedProjectModal.demo && (
+                <a
+                  href={selectedProjectModal.demo}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-primary"
+                  style={{ flex: 1, textAlign: 'center', padding: '0.75rem 1.2rem', fontSize: '0.88rem', fontWeight: '700', borderRadius: '12px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                >
+                  🚀 Canlı Gör (Demo) →
+                </a>
+              )}
+              {selectedProjectModal.github && (
+                <a
+                  href={selectedProjectModal.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary"
+                  style={{ flex: 1, textAlign: 'center', padding: '0.75rem 1.2rem', fontSize: '0.88rem', fontWeight: '700', borderRadius: '12px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                >
+                  <svg style={{ width: '18px', height: '18px', fill: 'currentColor' }} viewBox="0 0 24 24">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                  </svg>
+                  GitHub Deposu
+                </a>
+              )}
             </div>
           </div>
         </div>
