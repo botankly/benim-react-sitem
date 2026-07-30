@@ -1,5 +1,9 @@
 # 📦 Botan Külay | Monorepo Portfolyo ve E-Ticaret Ekosistemi
 
+[![CI/CD Pipeline](https://github.com/botankly/benim-react-sitem/actions/workflows/ci.yml/badge.svg)](https://github.com/botankly/benim-react-sitem/actions/workflows/ci.yml)
+[![Test Coverage](https://img.shields.io/badge/tests-passed-brightgreen)](https://github.com/botankly/benim-react-sitem/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Bu depo, **Turborepo** tabanlı monorepo mimarisi ile yönetilen; kişisel portfolyo, Trendsepetix RESTful API backend servisi, Trendsepetix Mobile uygulamasını ve ortak paketleri barındıran kurumsal standartlarda bir yazılım ekosistemidir.
 
 ---
@@ -38,6 +42,14 @@ Kök dizindeyken tüm workspace genelinde aşağıdaki komutları çalıştırab
   ```bash
   npm run lint
   ```
+- **Tüm Birim (Unit) Testleri Çalıştırma:**
+  ```bash
+  npm run test
+  ```
+- **Tüm Uçtan Uca (E2E) Testleri Çalıştırma:**
+  ```bash
+  npm run test:e2e
+  ```
 
 ---
 
@@ -47,10 +59,13 @@ Kök dizindeyken tüm workspace genelinde aşağıdaki komutları çalıştırab
 - **Teknolojiler:** React 19, Vite, Tailwind CSS, EmailJS, PWA
 - **Özellikler:** Botan-AI Chatbot, CLI Developer Terminal, Code Playground, CV Önizleyici, Sayaçlar ve animasyonlu grafik panelleri.
 - **Canlı Demo:** [benim-react-sitem.vercel.app](https://benim-react-sitem.vercel.app)
+- **Birim Testleri:** Vitest ve React Testing Library ile bileşen testleri (`Navbar.test.tsx`).
+- **E2E Testleri:** Playwright ile sayfa bazlı akış testleri (`e2e/home.spec.ts`).
 
 ### 🔌 RESTful API Servisi (`apps/api`)
 - **Teknolojiler:** Node.js, Express, JWT, Helmet, Express Rate Limit, Swagger UI
 - **Dokümantasyon:** Localde `http://localhost:5000/api-docs` adresinde Swagger UI ile canlı test imkanı sunar.
+- **Birim Testleri:** Vitest ve Supertest ile Auth ve Product rotalarının doğrulanması (`tests/auth.test.ts`).
 
 ### 📱 Mobil Uygulama (`apps/mobile`)
 - **Teknolojiler:** React Native, Expo SDK 51, React Navigation, AsyncStorage
@@ -60,6 +75,10 @@ Kök dizindeyken tüm workspace genelinde aşağıdaki komutları çalıştırab
 
 ## 📄 CI/CD ve Test Yapılandırması
 
-Projede kod kalitesini kontrol etmek için otomatik GitHub Actions ve Turborepo entegrasyonu mevcuttur.
+Projede kod kalitesini ve kararlılığını korumak için kapsamlı bir CI/CD ve test altyapısı entegre edilmiştir:
+
+1. **GitHub Actions Workflow (`.github/workflows/ci.yml`):** Her `push` veya `pull_request` işleminde otomatik tetiklenerek bağımlılıkları kurar, lint kontrolü yapar, birim ve E2E testleri koşturur ve build sürecini doğrular.
+2. **Vitest (Unit Testing):** Hızlı ve yerleşik TypeScript desteği ile frontend ve backend birim testlerini koşturur.
+3. **Playwright (E2E Testing):** Tarayıcı simülasyonu üzerinden tüm kullanıcı deneyimini (tema değişimi, projelerin yüklenmesi vb.) baştan sona test eder.
 
 **Botan Külay** tarafından geliştirilmiştir. [GitHub](https://github.com/botankly) | [LinkedIn](https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/)

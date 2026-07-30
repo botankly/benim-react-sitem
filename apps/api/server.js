@@ -86,7 +86,11 @@ app.use(errorHandler);
  *         description: Başarılı yanıt
  */
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-  console.log(`📖 API documentation available at http://localhost:${PORT}/api-docs`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+    console.log(`📖 API documentation available at http://localhost:${PORT}/api-docs`);
+  });
+}
+
+export default app;
