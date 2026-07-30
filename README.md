@@ -1,72 +1,65 @@
-# 🚀 Botan Külay | Kişisel Portfolyo Sitesi
+# 📦 Botan Külay | Monorepo Portfolyo ve E-Ticaret Ekosistemi
 
-[![React](https://img.shields.io/badge/React-18.x-61DAFB?logo=react&logoColor=black)](https://reactjs.org/)
-[![Vite](https://img.shields.io/badge/Vite-8.x-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.x-38BDF8?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Vercel Deployed](https://img.shields.io/badge/Vercel-Deployed-000000?logo=vercel&logoColor=white)](https://benim-react-sitem.vercel.app)
-[![PWA Ready](https://img.shields.io/badge/PWA-Ready-5A0FC8?logo=progressive-web-apps&logoColor=white)](#)
-
-Modern ön uç teknolojileri ile geliştirilmiş, tamamen etkileşimli, responsive ve yapay zekâ asistanlı yazılımcı portfolyosu.
-
-🔗 **Canlı Demo:** [benim-react-sitem.vercel.app](https://benim-react-sitem.vercel.app)
+Bu depo, **Turborepo** tabanlı monorepo mimarisi ile yönetilen; kişisel portfolyo, Trendsepetix RESTful API backend servisi, Trendsepetix Mobile uygulamasını ve ortak paketleri barındıran kurumsal standartlarda bir yazılım ekosistemidir.
 
 ---
 
-## ✨ Öne Çıkan Özellikler
+## 📂 Monorepo Mimarisi ve Klasör Yapısı
 
-- **🤖 Botan-AI Chatbot:** Sağ alt köşede yer alan, Botan Külay hakkında sıkça sorulan soruları (yetenekleri, eğitim durumu, projeleri vb.) yanıtlayan yapay zekâ asistanı.
-- **📟 Botan-CLI Terminal:** Geliştiriciler ve İK ekipleri için tasarlanmış, retro siyah-yeşil temalı tam interaktif komut satırı arayüzü (`help`, `about`, `skills`, `projects`, `contact`, `clear` komutları desteklenir).
-- **▶️ Code Playground:** Kod parçacıkları bölümünde yer alan JS/React algoritmalarını doğrudan tarayıcı konsolunda simüle eden entegre kod çalıştırma alanı.
-- **🌗 Dinamik Tema Değiştirici:** Sağ üst köşedeki buton ile yumuşak geçişli açık (light) ve koyu (dark) tema desteği.
-- **📱 PWA (Progressive Web App):** Mobil cihazlara uygulama olarak kurulabilme ve ana ekrana eklenebilme özelliği (`manifest.json` yapılandırması).
-- **📄 CV PDF Önizleme Modalı:** "CV İndir" butonuna basıldığında açılan şık bir PDF okuyucu modalı ve doğrudan indirme seçeneği.
-- **🔍 Proje Filtreleme & Arama:** Kategori butonları ve gerçek zamanlı arama girdisi ile projeler arasında süzme.
-
----
-
-## 🛠️ Kullanılan Teknolojiler
-
-- **Frontend:** React, HTML5, CSS3, ES6+ JavaScript, Tailwind CSS
-- **Yapı Araçları & Deploy:** Vite, Vercel
-- **Diğer:** Service Workers, Web App Manifest (PWA)
+```text
+benim-react-sitem/ (Monorepo Root)
+├── apps/
+│   ├── web/          # React 19 Kişisel Portfolyo Sitesi & E-Ticaret Arayüzü
+│   ├── api/          # Node.js & Express RESTful API Servisi (Swagger Belgelendirmeli)
+│   └── mobile/       # Trendsepetix Expo & React Native Mobil Alışveriş Uygulaması
+├── packages/
+│   ├── ui/           # Web ve Mobil projeleri için paylaşılan tasarım tokenları & UI ögeleri
+│   ├── config/       # ESLint, Prettier konfigürasyon presetleri
+│   └── types/        # Tüm uygulamalar arasında ortak veri modelleri (User, Product, Order, vb.)
+├── turbo.json        # Turborepo önbellekleme (caching) ve boru hattı (pipeline) tanımları
+└── package.json      # Workspace tanımları ve monorepo genel komutları
+```
 
 ---
 
-## 📦 Kurulum ve Çalıştırma
+## 🛠️ Monorepo Genel Komutları
 
-Projeyi yerel bilgisayarınızda çalıştırmak için aşağıdaki adımları takip edebilirsiniz:
+Kök dizindeyken tüm workspace genelinde aşağıdaki komutları çalıştırabilirsiniz:
 
-1. **Depoyu Klonlayın:**
-   ```bash
-   git clone https://github.com/botankly/benim-react-sitem.git
-   cd benim-react-sitem
-   ```
-
-2. **Bağımlılıkları Yükleyin:**
-   ```bash
-   npm install
-   ```
-
-3. **Geliştirme Sunucusunu Başlatın:**
-   ```bash
-   npm run dev
-   ```
-   *Tarayıcınızda `http://localhost:5173` adresine giderek portfolyoyu görüntüleyebilirsiniz.*
-
-4. **Production Sürümü İçin Derleyin:**
-   ```bash
-   npm run build
-   ```
+- **Geliştirme Ortamını Başlatma (Tüm Projeler):**
+  ```bash
+  npm run dev
+  ```
+- **Tüm Projeleri Derleme (Turborepo Caching Aktif):**
+  ```bash
+  npm run build
+  ```
+- **Tüm Projeleri Lint Etme:**
+  ```bash
+  npm run lint
+  ```
 
 ---
 
-## 📸 Ekran Görüntüleri (Örnek)
+## 🚀 Alt Proje Detayları
 
-> [!NOTE]
-> Sitenin görselleri, şık cam efekti (glassmorphism) ve modern koyu tema paleti (tokyonight/dark) ile optimize edilmiştir.
-> 
-> ![Portfolyo Önizleme](/og-image.png)
+### 💻 Web Uygulaması (`apps/web`)
+- **Teknolojiler:** React 19, Vite, Tailwind CSS, EmailJS, PWA
+- **Özellikler:** Botan-AI Chatbot, CLI Developer Terminal, Code Playground, CV Önizleyici, Sayaçlar ve animasyonlu grafik panelleri.
+- **Canlı Demo:** [benim-react-sitem.vercel.app](https://benim-react-sitem.vercel.app)
+
+### 🔌 RESTful API Servisi (`apps/api`)
+- **Teknolojiler:** Node.js, Express, JWT, Helmet, Express Rate Limit, Swagger UI
+- **Dokümantasyon:** Localde `http://localhost:5000/api-docs` adresinde Swagger UI ile canlı test imkanı sunar.
+
+### 📱 Mobil Uygulama (`apps/mobile`)
+- **Teknolojiler:** React Native, Expo SDK 51, React Navigation, AsyncStorage
+- **Özellikler:** Kategori sekmeli ürün listesi, detay ekranı, AsyncStorage sepet saklama, kupon kodu doğrulama ve native ödeme simülasyonu.
 
 ---
 
-**Botan Külay** tarafından geliştirilmiştir. [GitHub Profilim](https://github.com/botankly)
+## 📄 CI/CD ve Test Yapılandırması
+
+Projede kod kalitesini kontrol etmek için otomatik GitHub Actions ve Turborepo entegrasyonu mevcuttur.
+
+**Botan Külay** tarafından geliştirilmiştir. [GitHub](https://github.com/botankly) | [LinkedIn](https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/)

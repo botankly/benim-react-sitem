@@ -1,11 +1,13 @@
 {
-  "name": "trendsepetix-mobile",
+  "name": "mobile",
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "dev": "expo start",
+    "build": "echo 'No build required'"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "1.23.1",
