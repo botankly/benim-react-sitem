@@ -155,6 +155,70 @@ const mapWeatherCode = (code) => {
   return codes[code] || { condition: "Güneşli", icon: "☀️" };
 };
 
+// Dinamik Hava Durumu Tema Çözümleyici
+const getWeatherTheme = (condition = '', isDay = 1) => {
+  const cond = (condition || '').toLowerCase();
+  
+  if (isDay === 0) {
+    return {
+      bg: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(88, 28, 135, 0.45))',
+      border: 'rgba(168, 85, 247, 0.45)',
+      accent: '#c084fc',
+      badgeBg: 'rgba(168, 85, 247, 0.2)',
+      iconAnim: '',
+      effect: '✨ Gece Gökyüzü',
+      particle: '🌙'
+    };
+  }
+
+  if (cond.includes('yağmur') || cond.includes('sağanak') || cond.includes('çiseleme') || cond.includes('fırtına')) {
+    return {
+      bg: 'linear-gradient(135deg, rgba(30, 58, 138, 0.65), rgba(15, 23, 42, 0.95))',
+      border: 'rgba(96, 165, 250, 0.45)',
+      accent: '#60a5fa',
+      badgeBg: 'rgba(96, 165, 250, 0.2)',
+      iconAnim: 'weather-rain-particle',
+      effect: '🌧️ Yağmurlu Hava',
+      particle: '💧'
+    };
+  }
+
+  if (cond.includes('kar') || cond.includes('dondurucu') || cond.includes('dolu')) {
+    return {
+      bg: 'linear-gradient(135deg, rgba(14, 165, 233, 0.35), rgba(15, 23, 42, 0.95))',
+      border: 'rgba(56, 189, 248, 0.45)',
+      accent: '#38bdf8',
+      badgeBg: 'rgba(56, 189, 248, 0.2)',
+      iconAnim: 'weather-snow-particle',
+      effect: '❄️ Karlı & Soğuk',
+      particle: '❄️'
+    };
+  }
+
+  if (cond.includes('bulut') || cond.includes('sis') || cond.includes('kapalı') || cond.includes('puslu')) {
+    return {
+      bg: 'linear-gradient(135deg, rgba(71, 85, 105, 0.55), rgba(30, 41, 59, 0.95))',
+      border: 'rgba(148, 163, 184, 0.45)',
+      accent: '#cbd5e1',
+      badgeBg: 'rgba(148, 163, 184, 0.2)',
+      iconAnim: 'weather-cloud-particle',
+      effect: '☁️ Bulutlu Geçiş',
+      particle: '☁️'
+    };
+  }
+
+  // Güneşli / Açık
+  return {
+    bg: 'linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(15, 23, 42, 0.95))',
+    border: 'rgba(251, 191, 36, 0.45)',
+    accent: '#fbbf24',
+    badgeBg: 'rgba(251, 191, 36, 0.2)',
+    iconAnim: 'weather-sun-effect',
+    effect: '☀️ Güneşli & Açık',
+    particle: '☀️'
+  };
+};
+
 // Tarih formatlama fonksiyonu
 const formatDayName = (dateStr) => {
   const date = new Date(dateStr);
@@ -663,12 +727,118 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
     condition: "Parçalı Bulutlu",
     wind: 18,
     icon: "⛅",
+    isDay: 1,
     forecast: [
       { day: "Bugün", tempMax: 31, tempMin: 22, condition: "Parçalı Bulutlu", icon: "⛅" },
       { day: "Yarın", tempMax: 30, tempMin: 21, condition: "Açık", icon: "☀️" },
       { day: "Sonraki Gün", tempMax: 29, tempMin: 20, condition: "Açık", icon: "☀️" }
     ]
   });
+
+  // Geolocation (Otomatik Konum Algılama) State & Handler
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [geoError, setGeoError] = useState('');
+
+  const fetchWeatherByCoords = async (latitude, longitude, customName = null) => {
+    setGeoLoading(true);
+    setGeoError('');
+    try {
+      let locationName = customName;
+      if (!locationName) {
+        try {
+          const revRes = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=tr`
+          );
+          const revData = await revRes.json();
+          if (revData && revData.address) {
+            locationName = revData.address.city || revData.address.town || revData.address.district || revData.address.province || revData.address.state || "Mevcut Konum";
+          }
+        } catch (e) {
+          locationName = "Mevcut Konum";
+        }
+      }
+
+      const wRes = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&daily=daily,weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`
+      );
+      const wData = await wRes.json();
+
+      const currentInfo = mapWeatherCode(wData.current_weather.weathercode);
+      const isDay = wData.current_weather.is_day !== undefined ? wData.current_weather.is_day : 1;
+
+      const dailyForecast = [];
+      if (wData.daily && wData.daily.time) {
+        for (let i = 0; i < 3; i++) {
+          if (wData.daily.time[i]) {
+            const dayInfo = mapWeatherCode(wData.daily.weathercode[i]);
+            let dayLabel = formatDayName(wData.daily.time[i]);
+            if (i === 0) dayLabel = "Bugün";
+            else if (i === 1) dayLabel = "Yarın";
+
+            dailyForecast.push({
+              day: dayLabel,
+              tempMax: Math.round(wData.daily.temperature_2m_max[i]),
+              tempMin: Math.round(wData.daily.temperature_2m_min[i]),
+              condition: dayInfo.condition,
+              icon: dayInfo.icon
+            });
+          }
+        }
+      }
+
+      setWeatherData({
+        name: locationName || "Mevcut Konum",
+        temp: Math.round(wData.current_weather.temperature),
+        tempMax: wData.daily ? Math.round(wData.daily.temperature_2m_max[0]) : Math.round(wData.current_weather.temperature + 3),
+        tempMin: wData.daily ? Math.round(wData.daily.temperature_2m_min[0]) : Math.round(wData.current_weather.temperature - 3),
+        condition: currentInfo.condition,
+        wind: Math.round(wData.current_weather.windspeed),
+        icon: currentInfo.icon,
+        isDay: isDay,
+        isGeo: true,
+        forecast: dailyForecast.length > 0 ? dailyForecast : [
+          { day: "Bugün", tempMax: Math.round(wData.current_weather.temperature + 3), tempMin: Math.round(wData.current_weather.temperature - 3), condition: currentInfo.condition, icon: currentInfo.icon }
+        ]
+      });
+      showToastNotification(`📍 ${locationName || 'Mevcut Konum'} hava durumu güncellendi!`);
+    } catch (err) {
+      console.error("Geocoding/Weather fetch error:", err);
+      setGeoError("Konum hava durumu çekilemedi.");
+    } finally {
+      setGeoLoading(false);
+    }
+  };
+
+  const handleGeolocation = () => {
+    if (!navigator.geolocation) {
+      setGeoError("Tarayıcınız konum özelliğini desteklemiyor.");
+      return;
+    }
+    setGeoLoading(true);
+    setGeoError('');
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        fetchWeatherByCoords(latitude, longitude);
+      },
+      (err) => {
+        setGeoLoading(false);
+        if (err.code === err.PERMISSION_DENIED) {
+          setGeoError("Konum izni reddedildi. Şehir aramayı kullanabilirsiniz.");
+        } else {
+          setGeoError("Konum bilgisi alınamadı.");
+        }
+      },
+      { timeout: 8000 }
+    );
+  };
+
+  // Weather modal açıldığında otomatik konum kontrolü
+  useEffect(() => {
+    if (isWeatherOpen && !weatherData.isGeo) {
+      handleGeolocation();
+    }
+  }, [isWeatherOpen]);
 
   // To Do LocalStorage Senkronizasyonu
   useEffect(() => {
@@ -719,6 +889,8 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
           }
         }
 
+        const isDay = wData.current_weather.is_day !== undefined ? wData.current_weather.is_day : 1;
+        
         setWeatherData({
           name: name,
           temp: Math.round(wData.current_weather.temperature),
@@ -727,6 +899,7 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
           condition: currentInfo.condition,
           wind: Math.round(wData.current_weather.windspeed),
           icon: currentInfo.icon,
+          isDay: isDay,
           forecast: dailyForecast.length > 0 ? dailyForecast : [
             { day: "Bugün", tempMax: Math.round(wData.current_weather.temperature + 3), tempMin: Math.round(wData.current_weather.temperature - 3), condition: currentInfo.condition, icon: currentInfo.icon }
           ]
@@ -1738,104 +1911,166 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
       </main>
 
       {/* HAVA DURUMU UYGULAMASI MODAL POPUP */}
-      {isWeatherOpen && (
-        <div className="modal-overlay" onClick={() => setIsWeatherOpen(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '460px' }}>
-            <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '0.8rem', fontSize: '1.5rem', fontWeight: '800' }}>Hava Durumu Uygulaması</h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: '1.5' }}>
-              Hızlı şehir seçici, animasyonlu ikonlar ve özelleştirilebilir şehir arama ile güncel hava durumunu gösteren modern SPA widget'ı.
-            </p>
-            
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-              <input
-                type="text"
-                placeholder="Şehir yazın (örn: Van, İzmir)..."
-                value={cityInput}
-                onChange={(e) => setCityInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
-                style={{ flex: 1, padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-dark)', color: '#fff', fontSize: '14px', outline: 'none' }}
-              />
-              <button 
-                onClick={() => handleSearch()} 
-                style={{ padding: '10px 20px', borderRadius: '10px', backgroundColor: 'var(--accent-blue)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: '600', transition: 'background-color 0.2s' }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#3b82f6'}
-              >
-                Ara
-              </button>
-            </div>
-
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '18px', flexWrap: 'wrap' }}>
-              {['İstanbul', 'Ankara', 'İzmir', 'Van'].map((c) => (
-                <button
-                  key={c}
-                  onClick={() => handleSearch(c)}
-                  style={{ padding: '6px 12px', fontSize: '12px', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--text-main)', border: '1px solid var(--border-color)', cursor: 'pointer', transition: 'all 0.2s' }}
-                  onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--accent-cyan)'; e.currentTarget.style.backgroundColor = 'rgba(56, 189, 248, 0.05)'; }}
-                  onMouseOut={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'; }}
-                >
-                  {c}
-                </button>
-              ))}
-            </div>
-
-            <div style={{ backgroundColor: 'var(--bg-dark)', padding: '20px', borderRadius: '16px', marginBottom: '18px', border: '1px solid var(--border-color)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.3)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                <div style={{ textAlign: 'left' }}>
-                  <h4 style={{ fontSize: '20px', color: '#f8fafc', fontWeight: '800', margin: 0 }}>{weatherData.name}</h4>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: 0, marginTop: '2px' }}>{weatherData.condition}</p>
-                </div>
-                <div style={{ fontSize: '42px', filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.2))' }}>{weatherData.icon}</div>
-              </div>
+      {isWeatherOpen && (() => {
+        const activeTheme = getWeatherTheme(weatherData.condition, weatherData.isDay);
+        return (
+          <div className="modal-overlay" onClick={() => setIsWeatherOpen(false)}>
+            <div className="modal-content animate-modalEnter" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px', position: 'relative' }}>
+              <h3 style={{ color: 'var(--accent-cyan)', marginBottom: '0.5rem', fontSize: '1.5rem', fontWeight: '800' }}>Hava Durumu Uygulaması</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.2rem', lineHeight: '1.5' }}>
+                Otomatik konum algılama, canlı Open-Meteo verileri ve dinamik arka plan temaları içeren akıllı hava widget'ı.
+              </p>
               
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '12px' }}>
-                <span style={{ fontSize: '36px', fontWeight: '900', color: 'var(--accent-cyan)', letterSpacing: '-1px' }}>{weatherData.temp}°C</span>
-                <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>
-                  Yüksek: <strong style={{ color: '#f43f5e' }}>{weatherData.tempMax}°</strong> / Düşük: <strong style={{ color: '#60a5fa' }}>{weatherData.tempMin}°</strong>
-                </span>
+              {/* Arama Barı ve Mevcut Konum Butonu */}
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                <input
+                  type="text"
+                  placeholder="Şehir yazın (örn: Van, İzmir)..."
+                  value={cityInput}
+                  onChange={(e) => setCityInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
+                  style={{ flex: 1, padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-dark)', color: '#fff', fontSize: '14px', outline: 'none' }}
+                />
+                <button 
+                  onClick={() => handleSearch()} 
+                  style={{ padding: '10px 16px', borderRadius: '10px', backgroundColor: 'var(--accent-blue)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: '600', transition: 'background-color 0.2s' }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#3b82f6'}
+                  title="Şehir Ara"
+                >
+                  Ara
+                </button>
+                <button 
+                  onClick={handleGeolocation} 
+                  disabled={geoLoading}
+                  style={{ 
+                    padding: '10px 14px', borderRadius: '10px', 
+                    backgroundColor: geoLoading ? 'rgba(56,189,248,0.2)' : 'rgba(56, 189, 248, 0.12)', 
+                    color: 'var(--accent-cyan)', 
+                    border: '1px solid rgba(56, 189, 248, 0.35)', 
+                    cursor: geoLoading ? 'wait' : 'pointer', 
+                    fontWeight: '700', 
+                    fontSize: '0.8rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseOver={(e) => { if (!geoLoading) e.currentTarget.style.backgroundColor = 'rgba(56, 189, 248, 0.25)'; }}
+                  onMouseOut={(e) => { if (!geoLoading) e.currentTarget.style.backgroundColor = 'rgba(56, 189, 248, 0.12)'; }}
+                  title="Mevcut Konumumu Kullan"
+                >
+                  {geoLoading ? '⏳ Konum...' : '📍 Konumum'}
+                </button>
               </div>
-              <div style={{ textAlign: 'left', marginTop: '10px', fontSize: '12px', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between' }}>
-                <span>💨 Rüzgar Hızı: <strong>{weatherData.wind} km/s</strong></span>
-                <span>💧 Güncel Ölçüm</span>
-              </div>
-            </div>
 
-            <div style={{ marginBottom: '20px', textAlign: 'left' }}>
-              <h5 style={{ color: 'var(--accent-cyan)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px', fontWeight: '800' }}>3 Günlük Hava Tahmini</h5>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {weatherData.forecast.map((f, idx) => (
-                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--bg-dark)', padding: '10px 14px', borderRadius: '12px', fontSize: '13px', border: '1px solid var(--border-color)' }}>
-                    <span style={{ color: '#f8fafc', fontWeight: '600', width: '90px' }}>{f.day}</span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', flex: 1 }}>
-                      <span style={{ fontSize: '18px' }}>{f.icon}</span>
-                      <span style={{ fontSize: '12px' }}>{f.condition}</span>
-                    </span>
-                    <span style={{ color: '#f8fafc', fontWeight: '700' }}>
-                      <span style={{ color: '#f43f5e' }}>{f.tempMax}°</span>
-                      <span style={{ color: 'rgba(255,255,255,0.2)', margin: '0 6px' }}>|</span>
-                      <span style={{ color: '#60a5fa' }}>{f.tempMin}°</span>
-                    </span>
-                  </div>
+              {/* Hata Bildirimi */}
+              {geoError && (
+                <div style={{ padding: '6px 12px', borderRadius: '8px', backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.3)', fontSize: '0.75rem', marginBottom: '12px', textAlign: 'left', fontWeight: '600' }}>
+                  ⚠️ {geoError}
+                </div>
+              )}
+
+              {/* Hızlı Şehir Seçici */}
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px', flexWrap: 'wrap' }}>
+                {['İstanbul', 'Ankara', 'İzmir', 'Van', 'Antalya'].map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => handleSearch(c)}
+                    style={{ padding: '5px 12px', fontSize: '12px', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--text-main)', border: '1px solid var(--border-color)', cursor: 'pointer', transition: 'all 0.2s', fontWeight: '600' }}
+                    onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--accent-cyan)'; e.currentTarget.style.backgroundColor = 'rgba(56, 189, 248, 0.05)'; }}
+                    onMouseOut={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'; }}
+                  >
+                    {c}
+                  </button>
                 ))}
               </div>
-            </div>
 
-            <div style={{ display: 'flex', gap: '6px', marginBottom: '20px', justifyContent: 'center' }}>
-              <span style={{ fontSize: '10px', padding: '4px 8px', borderRadius: '6px', backgroundColor: 'var(--bg-dark)', color: 'var(--accent-cyan)', border: '1px solid rgba(56, 189, 248, 0.15)', fontWeight: '700' }}>React</span>
-              <span style={{ fontSize: '10px', padding: '4px 8px', borderRadius: '6px', backgroundColor: 'var(--bg-dark)', color: 'var(--accent-cyan)', border: '1px solid rgba(56, 189, 248, 0.15)', fontWeight: '700' }}>JavaScript</span>
-              <span style={{ fontSize: '10px', padding: '4px 8px', borderRadius: '6px', backgroundColor: 'var(--bg-dark)', color: 'var(--accent-cyan)', border: '1px solid rgba(56, 189, 248, 0.15)', fontWeight: '700' }}>API</span>
-              <span style={{ fontSize: '10px', padding: '4px 8px', borderRadius: '6px', backgroundColor: 'var(--bg-dark)', color: 'var(--accent-cyan)', border: '1px solid rgba(56, 189, 248, 0.15)', fontWeight: '700' }}>CSS</span>
-            </div>
+              {/* DİNAMİK HAVA DURUMU KARTI (Dynamic Weather Theme Card) */}
+              <div style={{ 
+                background: activeTheme.bg,
+                border: `1px solid ${activeTheme.border}`,
+                boxShadow: `0 12px 32px -4px ${activeTheme.border}`,
+                padding: '20px', 
+                borderRadius: '20px', 
+                marginBottom: '18px', 
+                position: 'relative',
+                overflow: 'hidden',
+                transition: 'all 0.4s ease'
+              }}>
+                {/* Animasyonlu Tema Etiketi */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <div style={{ textAlign: 'left' }}>
+                    <h4 style={{ fontSize: '22px', color: '#fff', fontWeight: '800', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      {weatherData.name}
+                      {weatherData.isGeo && <span style={{ fontSize: '11px', padding: '2px 6px', borderRadius: '4px', background: 'rgba(56,189,248,0.2)', color: 'var(--accent-cyan)', border: '1px solid rgba(56,189,248,0.4)', fontWeight: '700' }}>📍 GPS</span>}
+                    </h4>
+                    <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '13px', margin: 0, marginTop: '2px', fontWeight: '600' }}>{weatherData.condition}</p>
+                  </div>
 
-            <div style={{ display: 'flex', gap: '12px', marginBottom: '14px' }}>
-              <a href="https://benim-react-sitem.vercel.app" target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ flex: 1, padding: '10px 0', fontSize: '13.5px' }}>Canlı Gör</a>
-              <a href="https://github.com/botankly" target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ flex: 1, padding: '10px 0', fontSize: '13.5px' }}>GitHub</a>
-            </div>
+                  {/* Dinamik Animasyonlu Hava İkonu */}
+                  <div className={activeTheme.iconAnim} style={{ fontSize: '46px', filter: 'drop-shadow(0 0 12px rgba(255,255,255,0.3))' }}>
+                    {weatherData.icon}
+                  </div>
+                </div>
 
-            <button onClick={() => setIsWeatherOpen(false)} className="btn btn-secondary close-btn">Kapat</button>
+                {/* Dinamik Tema Rozeti */}
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '12px' }}>
+                  <span style={{ fontSize: '10px', padding: '3px 8px', borderRadius: '6px', backgroundColor: activeTheme.badgeBg, color: activeTheme.accent, border: `1px solid ${activeTheme.border}`, fontWeight: '800', letterSpacing: '0.04em' }}>
+                    {activeTheme.effect}
+                  </span>
+                </div>
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '12px' }}>
+                  <span style={{ fontSize: '38px', fontWeight: '900', color: activeTheme.accent, letterSpacing: '-1px', textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>{weatherData.temp}°C</span>
+                  <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '13px', fontWeight: '600' }}>
+                    Yüksek: <strong style={{ color: '#f43f5e' }}>{weatherData.tempMax}°</strong> / Düşük: <strong style={{ color: '#60a5fa' }}>{weatherData.tempMin}°</strong>
+                  </span>
+                </div>
+
+                <div style={{ textAlign: 'left', marginTop: '10px', fontSize: '12px', color: 'rgba(255,255,255,0.75)', display: 'flex', justifyContent: 'space-between', fontWeight: '600' }}>
+                  <span>💨 Rüzgar: <strong>{weatherData.wind} km/s</strong></span>
+                  <span>{activeTheme.particle} Canlı Durum</span>
+                </div>
+              </div>
+
+              {/* 3 Günlük Tahmin Listesi */}
+              <div style={{ marginBottom: '20px', textAlign: 'left' }}>
+                <h5 style={{ color: 'var(--accent-cyan)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px', fontWeight: '800' }}>3 Günlük Hava Tahmini</h5>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {weatherData.forecast.map((f, idx) => (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--bg-dark)', padding: '10px 14px', borderRadius: '12px', fontSize: '13px', border: '1px solid var(--border-color)' }}>
+                      <span style={{ color: '#f8fafc', fontWeight: '600', width: '90px' }}>{f.day}</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', flex: 1 }}>
+                        <span style={{ fontSize: '18px' }}>{f.icon}</span>
+                        <span style={{ fontSize: '12px' }}>{f.condition}</span>
+                      </span>
+                      <span style={{ color: '#f8fafc', fontWeight: '700' }}>
+                        <span style={{ color: '#f43f5e' }}>{f.tempMax}°</span>
+                        <span style={{ color: 'rgba(255,255,255,0.2)', margin: '0 6px' }}>|</span>
+                        <span style={{ color: '#60a5fa' }}>{f.tempMin}°</span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '6px', marginBottom: '20px', justifyContent: 'center' }}>
+                <span style={{ fontSize: '10px', padding: '4px 8px', borderRadius: '6px', backgroundColor: 'var(--bg-dark)', color: 'var(--accent-cyan)', border: '1px solid rgba(56, 189, 248, 0.15)', fontWeight: '700' }}>Geolocation API</span>
+                <span style={{ fontSize: '10px', padding: '4px 8px', borderRadius: '6px', backgroundColor: 'var(--bg-dark)', color: 'var(--accent-cyan)', border: '1px solid rgba(56, 189, 248, 0.15)', fontWeight: '700' }}>Open-Meteo</span>
+                <span style={{ fontSize: '10px', padding: '4px 8px', borderRadius: '6px', backgroundColor: 'var(--bg-dark)', color: 'var(--accent-cyan)', border: '1px solid rgba(56, 189, 248, 0.15)', fontWeight: '700' }}>Dynamic Themes</span>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', marginBottom: '14px' }}>
+                <a href="https://benim-react-sitem.vercel.app" target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ flex: 1, padding: '10px 0', fontSize: '13.5px' }}>Canlı Gör</a>
+                <a href="https://github.com/botankly" target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ flex: 1, padding: '10px 0', fontSize: '13.5px' }}>GitHub</a>
+              </div>
+
+              <button onClick={() => setIsWeatherOpen(false)} className="btn btn-secondary close-btn">Kapat</button>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* İLETİŞİM FORMU MODAL POPUP */}
       {isContactOpen && (
