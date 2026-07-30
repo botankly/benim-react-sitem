@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import emailjs from '@emailjs/browser';
 import heroImage from './assets/hero.png';
 import Navbar from './components/Navbar';
+import SaaSDashboard from './components/SaaSDashboard';
 
 // Türkiye 81 il ve popüler ilçeler/isimler için haritalama
 const TURKISH_CITIES_MAP = {
@@ -418,6 +419,7 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
   // Tema ve Yetenek Sekmesi States
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
   const [activeSkillTab, setActiveSkillTab] = useState('frontend');
+  const [currentView, setCurrentView] = useState('portfolio');
 
   // Proje Arama ve Kategori Filtreleme States
   const [projectSearch, setProjectSearch] = useState('');
@@ -791,9 +793,13 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
   return (
     <>
       {/* 1. Navbar & Gezinti */}
-      <Navbar theme={theme} toggleTheme={toggleTheme} setIsContactOpen={setIsContactOpen} />
+      <Navbar theme={theme} toggleTheme={toggleTheme} setIsContactOpen={setIsContactOpen} currentView={currentView} setCurrentView={setCurrentView} />
 
-      {/* Ana Kapsayıcı */}
+      {currentView === 'dashboard' ? (
+        <SaaSDashboard />
+      ) : (
+        <>
+          {/* Ana Kapsayıcı */}
       <main className="main-container">
         
         {/* 2. Hero Bölümü */}
@@ -2165,6 +2171,9 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
             <button type="submit" className="btn btn-primary" style={{ padding: '0 0.8rem', fontSize: '0.75rem', borderRadius: '10px' }}>Gönder</button>
           </form>
         </div>
+      )}
+
+        </>
       )}
 
       {/* Chatbot Floating Balloon */}
