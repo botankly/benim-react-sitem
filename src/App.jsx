@@ -229,7 +229,10 @@ export function useLocalStorage(key, initialValue) {
   }, [key, value]);
 
   return [value, setValue];
-}`
+}`,
+    runSimulation: () => {
+      return `[Mock React Core] Hook useLocalStorage("user-theme", "dark") çağrıldı.\n[LocalStorage] Veri okundu: null. Varsayılan değer kullanılıyor: "dark"\n[LocalStorage] Yazıldı -> {"user-theme": "dark"}\n[State] Başarıyla senkronize edildi!`;
+    }
   },
   {
     id: "glassmorphism",
@@ -239,7 +242,10 @@ export function useLocalStorage(key, initialValue) {
     code: `<div className="backdrop-blur-md bg-white/5 
   border border-white/10 shadow-lg">
   {/* Buzlu cam içerik */}
-</div>`
+</div>`,
+    runSimulation: () => {
+      return `[CSS Parser] Sınıflar çözümleniyor:\n- backdrop-blur-md: backdrop-filter: blur(12px)\n- bg-white/5: background-color: rgba(255, 255, 255, 0.05)\n- border-white/10: border: 1px solid rgba(255, 255, 255, 0.1)\n- shadow-lg: box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1)\n[Render Engine] Donanım hızlandırmalı cam efekti başarıyla çizildi!`;
+    }
   },
   {
     id: "debounce",
@@ -254,7 +260,10 @@ export function useLocalStorage(key, initialValue) {
       fn.apply(this, args);
     }, delay);
   };
-}`
+}`,
+    runSimulation: () => {
+      return `[JS Engine] Debounce tanımlandı (delay: 200ms).\n[Tetikleme] Tuş vuruşu: "R" (İşlem iptal edildi)\n[Tetikleme] Tuş vuruşu: "Re" (İşlem iptal edildi)\n[Tetikleme] Tuş vuruşu: "React" (200ms beklendi...)\n[Çıktı] API Arama fonksiyonu tetiklendi: "React"\n[Performans] 3 tetiklemeden sadece 1 arama yapıldı. %66 performans tasarrufu!`;
+    }
   }
 ];
 
@@ -414,6 +423,61 @@ LinkedIn:  https://linkedin.com`;
 
   // Yukarı Çık Butonu State
   const [showBackToTop, setShowBackToTop] = useState(false);
+
+  // Botan-AI Chatbot States
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState('');
+  const [chatMessages, setChatMessages] = useState([
+    { sender: 'bot', text: 'Merhaba! Ben Botan\'ın yapay zekâ asistanıyım. Botan hakkında bilgi almak veya aklınıza takılanları sormak için aşağıdaki hazır butonları kullanabilir veya bana yazabilirsiniz!' }
+  ]);
+
+  // Code Playground Outputs State
+  const [playgroundOutputs, setPlaygroundOutputs] = useState({});
+
+  const handleSendMessage = (textToSend) => {
+    const text = textToSend || chatInput.trim();
+    if (!text) return;
+
+    // Add user message
+    setChatMessages(prev => [...prev, { sender: 'user', text }]);
+    if (!textToSend) setChatInput('');
+
+    // Botan AI intelligence replies
+    setTimeout(() => {
+      let reply = '';
+      const cleanText = text.toLowerCase();
+
+      if (cleanText.includes('yetenek') || cleanText.includes('skill') || cleanText.includes('neler yapabiliyor')) {
+        reply = 'Botan Külay; Frontend\'de React, TypeScript ve Tailwind CSS; Backend\'de Node.js ve Python (Django) ile fullstack web projeleri geliştiriyor. Ayrıca React Native ile mobil uygulama geliştirme tecrübesine sahip.';
+      } else if (cleanText.includes('iletişim') || cleanText.includes('contact') || cleanText.includes('mail') || cleanText.includes('ulaş')) {
+        reply = 'Botan\'a doğrudan sitemizdeki "İletişime Geç" formunu doldurarak veya botan.kulay@example.com adresi üzerinden e-posta atarak ulaşabilirsiniz. Ayrıca sağ üstteki GitHub linkinden de çalışmalarını inceleyebilirsiniz.';
+      } else if (cleanText.includes('üniversite') || cleanText.includes('okul') || cleanText.includes('eğitim') || cleanText.includes('nerede okuyor')) {
+        reply = 'Botan Külay, Fırat Üniversitesi Yazılım Mühendisliği bölümünde lisans eğitimine devam ediyor (son sınıf öğrencisi).';
+      } else if (cleanText.includes('proje') || cleanText.includes('neler yaptı')) {
+        reply = 'En büyük projelerinden biri olan Trendsepetix; e-ticaret veri madenciliği analitiği, AI birliktelik kural analizi (Apriori) ve bölgesel yoğunluk ısı haritaları sunan tam kapsamlı bir full-stack karar destek panelidir.';
+      } else if (cleanText.includes('merhaba') || cleanText.includes('selam')) {
+        reply = 'Merhaba! Botan\'ın portfolyosuna hoş geldiniz. Size nasıl yardımcı olabilirim? Okulu, yetenekleri veya projeleri hakkında bilgi vermemi ister misiniz?';
+      } else {
+        reply = 'Bu konuda detaylı bilgiyi Botan\'ın özgeçmişinde (CV) bulabilirsiniz. Ayrıca sitemizdeki İletişim formundan doğrudan kendisine yazarak merak ettiklerinizi birinci ağızdan sorabilirsiniz!';
+      }
+
+      setChatMessages(prev => [...prev, { sender: 'bot', text: reply }]);
+      
+      // Auto-scroll chat body
+      setTimeout(() => {
+        const body = document.querySelector('.chat-body');
+        if (body) body.scrollTop = body.scrollHeight;
+      }, 50);
+    }, 600);
+  };
+
+  const handleRunCode = (id, simFn) => {
+    setPlaygroundOutputs(prev => ({
+      ...prev,
+      [id]: simFn()
+    }));
+    showToastNotification("Kod başarıyla çalıştırıldı!");
+  };
 
   // Animasyonlu Sayaç State
   const [stats, setStats] = useState({ projects: 0, performance: 0 });
@@ -1297,33 +1361,71 @@ LinkedIn:  https://linkedin.com`;
           <div className="code-grid">
             {CODE_SNIPPETS.map((snippet) => (
               <div key={snippet.id} className="ide-window">
-                <div className="ide-header">
+                <div className="ide-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div className="ide-dots">
                     <span className="ide-dot red"></span>
                     <span className="ide-dot yellow"></span>
                     <span className="ide-dot green"></span>
                   </div>
-                  <button 
-                    onClick={() => handleCopy(snippet.id, snippet.code)} 
-                    className="ide-copy-btn"
-                  >
-                    {copiedId === snippet.id ? (
-                      <span>✔️ Kopyalandı!</span>
-                    ) : (
-                      <>
-                        <svg style={{ width: '13px', height: '13px' }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg>
-                        <span>Kopyala</span>
-                      </>
-                    )}
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button 
+                      onClick={() => handleRunCode(snippet.id, snippet.runSimulation)} 
+                      className="ide-copy-btn"
+                      style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      <span>▶️ Çalıştır</span>
+                    </button>
+                    <button 
+                      onClick={() => handleCopy(snippet.id, snippet.code)} 
+                      className="ide-copy-btn"
+                    >
+                      {copiedId === snippet.id ? (
+                        <span>✔️ Kopyalandı!</span>
+                      ) : (
+                        <>
+                          <svg style={{ width: '13px', height: '13px' }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                          </svg>
+                          <span>Kopyala</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 <pre className="ide-body">
                   <code>{snippet.code}</code>
                 </pre>
+
+                {playgroundOutputs[snippet.id] && (
+                  <div style={{
+                    background: '#040711',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+                    padding: '1rem',
+                    fontFamily: '"Fira Code", monospace',
+                    fontSize: '0.8rem',
+                    color: '#10b981',
+                    textAlign: 'left'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem', borderBottom: '1px dashed rgba(16, 185, 129, 0.2)', paddingBottom: '0.2rem' }}>
+                      <span style={{ fontWeight: 'bold', color: '#fff' }}>📟 Console Output</span>
+                      <button 
+                        onClick={() => setPlaygroundOutputs(prev => {
+                          const next = { ...prev };
+                          delete next[snippet.id];
+                          return next;
+                        })}
+                        style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer' }}
+                      >
+                        Temizle
+                      </button>
+                    </div>
+                    <pre style={{ whiteSpace: 'pre-wrap', margin: 0, color: 'inherit', font: 'inherit' }}>
+                      {playgroundOutputs[snippet.id]}
+                    </pre>
+                  </div>
+                )}
 
                 <div className="snippet-details">
                   <h3>{snippet.title}</h3>
@@ -1496,6 +1598,35 @@ LinkedIn:  https://linkedin.com`;
             </div>
           </div>
         </section>
+
+        {/* Teknik Sistem Durumu (System Status Footer) */}
+        <div className="system-status-ribbon" style={{
+          borderTop: '1px solid var(--border-color)',
+          background: 'rgba(255, 255, 255, 0.01)',
+          padding: '1.2rem 1rem',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '2.5rem',
+          flexWrap: 'wrap',
+          fontSize: '0.8rem',
+          fontWeight: '700',
+          color: 'var(--text-muted)'
+        }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 8px #22c55e' }}></span>
+            All Systems Operational
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            ⚡ Vercel Edge Deployed
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            🚀 React 18 Powered
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            💯 Lighthouse Score: 98+
+          </span>
+        </div>
 
         {/* Footer & İletişim Butonu */}
         <footer style={{ padding: '4rem 0', textAlign: 'center', borderTop: '1px solid var(--border-color)' }}>
@@ -1920,6 +2051,154 @@ LinkedIn:  https://linkedin.com`;
           </div>
         </div>
       )}
+
+      {/* Chatbot Floating Window */}
+      {isChatOpen && (
+        <div style={{
+          position: 'fixed',
+          bottom: '6.2rem',
+          right: '2rem',
+          width: '350px',
+          height: '450px',
+          background: 'rgba(15, 23, 42, 0.95)',
+          backdropFilter: 'blur(16px)',
+          border: '1px solid var(--border-color)',
+          borderRadius: '20px',
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4)',
+          display: 'flex',
+          flexDirection: 'column',
+          zIndex: 1000,
+          overflow: 'hidden',
+          animation: 'modalEnter 0.3s cubic-bezier(0.165, 0.84, 0.44, 1)',
+          textAlign: 'left'
+        }}>
+          {/* Header */}
+          <div style={{
+            background: 'var(--accent-purple)',
+            color: '#fff',
+            padding: '1rem',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '1.2rem' }}>🤖</span>
+              <div>
+                <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: '800' }}>Botan-AI Asistan</h4>
+                <span style={{ fontSize: '0.7rem', opacity: 0.8 }}>Çevrimiçi | Akıllı Asistan</span>
+              </div>
+            </div>
+            <button onClick={() => setIsChatOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '1.1rem' }}>✕</button>
+          </div>
+
+          {/* Messages body */}
+          <div className="chat-body" style={{
+            flex: 1,
+            padding: '1rem',
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px'
+          }}>
+            {chatMessages.map((msg, idx) => (
+              <div key={idx} style={{
+                alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
+                background: msg.sender === 'user' ? 'var(--accent-cyan)' : 'rgba(255, 255, 255, 0.05)',
+                color: msg.sender === 'user' ? '#000' : '#fff',
+                padding: '0.6rem 0.9rem',
+                borderRadius: msg.sender === 'user' ? '16px 16px 2px 16px' : '16px 16px 16px 2px',
+                maxWidth: '80%',
+                fontSize: '0.8rem',
+                lineHeight: '1.4',
+                fontWeight: msg.sender === 'user' ? '700' : '500'
+              }}>
+                {msg.text}
+              </div>
+            ))}
+          </div>
+
+          {/* Suggested prompts */}
+          <div style={{
+            padding: '0.5rem 1rem',
+            display: 'flex',
+            gap: '6px',
+            flexWrap: 'wrap',
+            borderTop: '1px solid rgba(255, 255, 255, 0.03)'
+          }}>
+            <button 
+              onClick={() => handleSendMessage("Botan'ın yetenekleri neler?")} 
+              style={{ background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.2)', color: 'var(--accent-cyan)', fontSize: '0.7rem', padding: '4px 8px', borderRadius: '8px', cursor: 'pointer' }}
+            >
+              💻 Yetenekler
+            </button>
+            <button 
+              onClick={() => handleSendMessage("Hangi üniversitede okuyor?")} 
+              style={{ background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.2)', color: 'var(--accent-cyan)', fontSize: '0.7rem', padding: '4px 8px', borderRadius: '8px', cursor: 'pointer' }}
+            >
+              🎓 Okul Bilgisi
+            </button>
+            <button 
+              onClick={() => handleSendMessage("İletişim bilgileri?")} 
+              style={{ background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.2)', color: 'var(--accent-cyan)', fontSize: '0.7rem', padding: '4px 8px', borderRadius: '8px', cursor: 'pointer' }}
+            >
+              ✉️ İletişim
+            </button>
+          </div>
+
+          {/* Input footer */}
+          <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} style={{
+            padding: '0.8rem 1rem',
+            borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+            display: 'flex',
+            gap: '8px'
+          }}>
+            <input 
+              type="text" 
+              value={chatInput} 
+              onChange={(e) => setChatInput(e.target.value)} 
+              placeholder="Sorunuzu buraya yazın..."
+              style={{
+                flex: 1,
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '10px',
+                padding: '0.4rem 0.8rem',
+                color: '#fff',
+                fontSize: '0.8rem',
+                outline: 'none'
+              }}
+            />
+            <button type="submit" className="btn btn-primary" style={{ padding: '0 0.8rem', fontSize: '0.75rem', borderRadius: '10px' }}>Gönder</button>
+          </form>
+        </div>
+      )}
+
+      {/* Chatbot Floating Balloon */}
+      <button
+        onClick={() => setIsChatOpen(!isChatOpen)}
+        style={{
+          position: 'fixed',
+          bottom: '2rem',
+          right: '5.8rem',
+          width: '46px',
+          height: '46px',
+          borderRadius: '50%',
+          background: 'var(--accent-cyan)',
+          border: 'none',
+          color: '#000',
+          cursor: 'pointer',
+          boxShadow: '0 4px 20px rgba(56, 189, 248, 0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '1.2rem',
+          zIndex: 999,
+          transition: 'all 0.3s ease'
+        }}
+        title="Botan-AI Chatbot"
+      >
+        {isChatOpen ? '✕' : '🤖'}
+      </button>
 
       {toastMessage && (
         <div style={{
