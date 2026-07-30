@@ -801,6 +801,7 @@ LinkedIn:  https://linkedin.com`;
                   lineHeight: '1'
                 }}
                 title={theme === 'dark' ? 'Açık Temaya Geç' : 'Koyu Temaya Geç'}
+                aria-label={theme === 'dark' ? 'Açık temaya geç' : 'Koyu temaya geç'}
               >
                 {theme === 'dark' ? '☀️' : '🌙'}
               </button>
@@ -816,7 +817,7 @@ LinkedIn:  https://linkedin.com`;
         <section id="hero" className="hero-section">
           {/* Gradyan Kenarlıklı Avatar */}
           <div className="avatar-wrapper">
-            <img src={heroImage} className="avatar-img" alt="Botan Külay" />
+            <img src={heroImage} className="avatar-img" alt="Botan Külay" decoding="async" />
           </div>
           
           <h1>Botan Külay</h1>
@@ -829,6 +830,7 @@ LinkedIn:  https://linkedin.com`;
               target="_blank" 
               rel="noopener noreferrer" 
               className="social-btn github"
+              aria-label="Botan Külay GitHub Profiline Git"
             >
               <svg style={{ width: '18px', height: '18px', fill: 'currentColor' }} viewBox="0 0 24 24">
                 <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
@@ -840,6 +842,7 @@ LinkedIn:  https://linkedin.com`;
               target="_blank" 
               rel="noopener noreferrer" 
               className="social-btn linkedin"
+              aria-label="Botan Külay LinkedIn Profiline Git"
             >
               <svg style={{ width: '18px', height: '18px', fill: 'currentColor' }} viewBox="0 0 24 24">
                 <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
@@ -854,6 +857,7 @@ LinkedIn:  https://linkedin.com`;
                 cursor: 'pointer',
                 background: 'rgba(255, 255, 255, 0.03)'
               }}
+              aria-label="Özgeçmiş CV önizleme modalını aç"
             >
               <svg style={{ width: '18px', height: '18px', fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' }} viewBox="0 0 24 24">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -1242,7 +1246,7 @@ LinkedIn:  https://linkedin.com`;
                         ].map(prod => (
                           <div key={prod.id} style={{ backgroundColor: '#1e293b', padding: '12px', borderRadius: '14px', border: '1px solid var(--border-color)', display: 'flex', gap: '10px', textAlign: 'left' }}>
                             <div style={{ width: '45px', height: '45px', borderRadius: '10px', overflow: 'hidden', backgroundColor: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2px', flexShrink: 0 }}>
-                              <img src={prod.image} alt={prod.name} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                              <img src={prod.image} alt={prod.name} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} loading="lazy" decoding="async" />
                             </div>
                             <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '3px' }}>
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '4px' }}>
@@ -1273,7 +1277,7 @@ LinkedIn:  https://linkedin.com`;
                                 <div key={item.id} style={{ backgroundColor: '#1e293b', padding: '10px 12px', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', gap: '8px' }}>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
                                     <div style={{ width: '28px', height: '28px', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2px', flexShrink: 0 }}>
-                                      <img src={item.image} alt={item.name} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                                      <img src={item.image} alt={item.name} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} loading="lazy" decoding="async" />
                                     </div>
                                     <div style={{ minWidth: 0, flex: 1 }}>
                                       <strong style={{ color: '#fff', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</strong>
@@ -1308,7 +1312,7 @@ LinkedIn:  https://linkedin.com`;
                     {mobileTab === 'profile' && (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'center', animation: 'scaleIn 0.25s ease' }}>
                         <div style={{ width: '55px', height: '55px', borderRadius: '50%', border: '2px solid var(--accent-cyan)', margin: '0 auto 4px auto', overflow: 'hidden' }}>
-                          <img src={heroImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Profile" />
+                          <img src={heroImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Profile" loading="lazy" decoding="async" />
                         </div>
                         <strong style={{ fontSize: '13px', color: '#fff', display: 'block' }}>Botan Külay</strong>
                         <span style={{ fontSize: '9px', color: 'var(--text-muted)', display: 'block', marginTop: '-8px' }}>botan.kulay@gmail.com</span>
@@ -1578,6 +1582,8 @@ LinkedIn:  https://linkedin.com`;
                 src="https://github-readme-stats.vercel.app/api?username=botankly&show_icons=true&theme=tokyonight&hide_border=true" 
                 className="github-card-img" 
                 alt="GitHub İstatistikleri" 
+                loading="lazy"
+                decoding="async"
               />
             </div>
             
@@ -1586,6 +1592,8 @@ LinkedIn:  https://linkedin.com`;
                 src="https://github-readme-stats.vercel.app/api/top-langs/?username=botankly&layout=compact&theme=tokyonight&hide_border=true" 
                 className="github-card-img" 
                 alt="En Çok Kullanılan Diller" 
+                loading="lazy"
+                decoding="async"
               />
             </div>
             
@@ -1594,6 +1602,8 @@ LinkedIn:  https://linkedin.com`;
                 src="https://github-readme-streak-stats.herokuapp.com/?user=botankly&theme=tokyonight&hide_border=true" 
                 className="github-card-img" 
                 alt="GitHub Streak İstatistikleri" 
+                loading="lazy"
+                decoding="async"
               />
             </div>
           </div>
