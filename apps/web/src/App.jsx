@@ -1493,11 +1493,22 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
                     {project.hasDetails && (
                       <a href="#" onClick={(e) => {
                         e.preventDefault();
-                        setSelectedProjectModal(project);
+                        if (project.detailAction === 'weather') {
+                          setIsWeatherOpen(true);
+                        } else {
+                          setSelectedProjectModal(project);
+                        }
                       }} className="card-link">Detayları Gör →</a>
                     )}
                     <a href={project.github} target="_blank" rel="noopener noreferrer" className="card-link">GitHub →</a>
-                    <a href={project.demo} target="_blank" rel="noopener noreferrer" className="card-link">Canlı Gör →</a>
+                    {project.detailAction === 'weather' ? (
+                      <a href="#" onClick={(e) => {
+                        e.preventDefault();
+                        setIsWeatherOpen(true);
+                      }} className="card-link">Canlı Gör →</a>
+                    ) : (
+                      <a href={project.demo} target="_blank" rel="noopener noreferrer" className="card-link">Canlı Gör →</a>
+                    )}
                   </div>
                 </div>
               ))
@@ -2773,7 +2784,18 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
 
             {/* Bağlantı Butonları: Canlı Gör & GitHub */}
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', paddingTop: '1.2rem', borderTop: '1px solid var(--border-color)' }}>
-              {selectedProjectModal.demo && (
+              {selectedProjectModal.detailAction === 'weather' ? (
+                <button
+                  onClick={() => {
+                    setSelectedProjectModal(null);
+                    setIsWeatherOpen(true);
+                  }}
+                  className="btn btn-primary"
+                  style={{ flex: 1, textAlign: 'center', padding: '0.75rem 1.2rem', fontSize: '0.88rem', fontWeight: '700', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', border: 'none' }}
+                >
+                  🌤️ Canlı Hava Durumu Panelini Aç →
+                </button>
+              ) : selectedProjectModal.demo && (
                 <a
                   href={selectedProjectModal.demo}
                   target="_blank"
