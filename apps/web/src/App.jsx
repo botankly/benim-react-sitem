@@ -6,119 +6,7 @@ import SaaSDashboard from './components/SaaSDashboard';
 import LoginRegister from './components/LoginRegister';
 import { useAuth } from './context/AuthContext';
 
-// Türkiye 81 il ve popüler ilçeler/isimler için haritalama
-const TURKISH_CITIES_MAP = {
-  "adana": "Adana",
-  "adiyaman": "Adıyaman",
-  "afyonkarahisar": "Afyonkarahisar",
-  "afyon": "Afyonkarahisar",
-  "agri": "Ağrı",
-  "aksaray": "Aksaray",
-  "amasya": "Amasya",
-  "ankara": "Ankara",
-  "antalya": "Antalya",
-  "ardahan": "Ardahan",
-  "artvin": "Artvin",
-  "aydin": "Aydın",
-  "balikesir": "Balıkesir",
-  "bartin": "Bartın",
-  "batman": "Batman",
-  "bayburt": "Bayburt",
-  "bilecik": "Bilecik",
-  "bingol": "Bingöl",
-  "bitlis": "Bitlis",
-  "bolu": "Bolu",
-  "burdur": "Burdur",
-  "bursa": "Bursa",
-  "canakkale": "Çankırı",
-  "corum": "Çorum",
-  "denizli": "Denizli",
-  "diyarbakir": "Diyarbakır",
-  "duzce": "Düzce",
-  "edirne": "Edirne",
-  "elazig": "Elazığ",
-  "elazigh": "Elazığ",
-  "elazıg": "Elazığ",
-  "erzincan": "Erzincan",
-  "erzurum": "Erzurum",
-  "eskisehir": "Eskişehir",
-  "gaziantep": "Gaziantep",
-  "giresun": "Giresun",
-  "gumushane": "Gümüşhane",
-  "hakkari": "Hakkâri",
-  "hatay": "Hatay",
-  "igdir": "Iğdır",
-  "isparta": "Isparta",
-  "istanbul": "İstanbul",
-  "izmir": "İzmir",
-  "kahramanmaras": "Kahramanmaraş",
-  "maras": "Kahramanmaraş",
-  "karabuk": "Karabük",
-  "karaman": "Karaman",
-  "kars": "Kars",
-  "kastamonu": "Kastamonu",
-  "kayseri": "Kayseri",
-  "kilis": "Kilis",
-  "kirikkale": "Kırıkkale",
-  "kirklareli": "Kırklareli",
-  "kirsehir": "Kırşehir",
-  "kocaeli": "Kocaeli",
-  "izmit": "Kocaeli",
-  "konya": "Konya",
-  "kutahya": "Kütahya",
-  "malatya": "Malatya",
-  "manisa": "Manisa",
-  "mardin": "Mardin",
-  "mersin": "Mersin",
-  "icel": "Mersin",
-  "mugla": "Muğla",
-  "mus": "Muş",
-  "nevsehir": "Nevşehir",
-  "nigde": "Niğde",
-  "ordu": "Ordu",
-  "osmaniye": "Osmaniye",
-  "rize": "Rize",
-  "sakarya": "Sakarya",
-  "adapazari": "Sakarya",
-  "samsun": "Samsun",
-  "sanliurfa": "Şanlıurfa",
-  "urfa": "Şanlıurfa",
-  "siirt": "Siirt",
-  "sinop": "Sinop",
-  "sivas": "Sivas",
-  "sirnak": "Şırnak",
-  "tekirdag": "Tekirdağ",
-  "tokat": "Tokat",
-  "trabzon": "Trabzon",
-  "tunceli": "Tunceli",
-  "usak": "Uşak",
-  "van": "Van",
-  "yalova": "Yalova",
-  "yozgat": "Yozgat",
-  "zonguldak": "Zonguldak"
-};
 
-// Türkçe karakter duyarlı normalleştirme
-const normalizeText = (str) => {
-  if (!str) return "";
-  return str
-    .toString()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/I/g, 'ı')
-    .replace(/İ/g, 'i')
-    .toLowerCase()
-    .replace(/ı/g, 'i')
-    .replace(/ğ/g, 'g')
-    .replace(/ü/g, 'u')
-    .replace(/ş/g, 's')
-    .replace(/ö/g, 'o')
-    .replace(/ç/g, 'c')
-    .replace(/â/g, 'a')
-    .replace(/î/g, 'i')
-    .replace(/û/g, 'u')
-    .trim();
-};
 
 // WMO Weather codes
 const mapWeatherCode = (code) => {
@@ -837,6 +725,9 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
     const wRes = await fetch(
       `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m,wind_direction_10m&current_weather=true&hourly=temperature_2m,relative_humidity_2m,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max&timezone=auto`
     );
+    if (!wRes.ok) {
+      throw new Error(`Open-Meteo Weather API HTTP Error: ${wRes.status}`);
+    }
     const wData = await wRes.json();
 
     let aqiVal = 35;
@@ -844,19 +735,47 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
       const aqRes = await fetch(
         `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${latitude}&longitude=${longitude}&current=us_aqi`
       );
-      const aqData = await aqRes.json();
-      if (aqData && aqData.current && aqData.current.us_aqi !== undefined) {
-        aqiVal = Math.round(aqData.current.us_aqi);
+      if (aqRes.ok) {
+        const aqData = await aqRes.json();
+        if (aqData && aqData.current && aqData.current.us_aqi !== undefined) {
+          aqiVal = Math.round(aqData.current.us_aqi);
+        }
       }
     } catch (e) {
       console.warn("AQI API fetch notice:", e);
     }
 
-    const currentInfo = mapWeatherCode(wData.current_weather ? wData.current_weather.weathercode : 0);
-    const isDay = wData.current_weather && wData.current_weather.is_day !== undefined ? wData.current_weather.is_day : 1;
-    const feelsLikeVal = wData.hourly && wData.hourly.apparent_temperature && wData.hourly.apparent_temperature[0] !== undefined
-      ? Math.round(wData.hourly.apparent_temperature[0])
-      : Math.round(wData.current_weather.temperature);
+    const currentTemp = wData.current && wData.current.temperature_2m !== undefined
+      ? wData.current.temperature_2m
+      : (wData.current_weather && wData.current_weather.temperature !== undefined ? wData.current_weather.temperature : 0);
+    const roundedTemp = Math.round(currentTemp);
+
+    const currentWeatherCode = wData.current && wData.current.weather_code !== undefined
+      ? wData.current.weather_code
+      : (wData.current_weather && wData.current_weather.weathercode !== undefined ? wData.current_weather.weathercode : 0);
+    const currentInfo = mapWeatherCode(currentWeatherCode);
+
+    const isDay = wData.current && wData.current.is_day !== undefined
+      ? wData.current.is_day
+      : (wData.current_weather && wData.current_weather.is_day !== undefined ? wData.current_weather.is_day : 1);
+
+    const feelsLikeVal = wData.current && wData.current.apparent_temperature !== undefined
+      ? Math.round(wData.current.apparent_temperature)
+      : (wData.hourly && wData.hourly.apparent_temperature && wData.hourly.apparent_temperature[0] !== undefined
+        ? Math.round(wData.hourly.apparent_temperature[0])
+        : roundedTemp);
+
+    const windSpeedVal = wData.current && wData.current.wind_speed_10m !== undefined
+      ? Math.round(wData.current.wind_speed_10m)
+      : (wData.current_weather && wData.current_weather.windspeed !== undefined ? Math.round(wData.current_weather.windspeed) : 0);
+
+    const windDirectionVal = wData.current && wData.current.wind_direction_10m !== undefined
+      ? wData.current.wind_direction_10m
+      : (wData.current_weather && wData.current_weather.winddirection !== undefined ? wData.current_weather.winddirection : 0);
+
+    const humidityVal = wData.current && wData.current.relative_humidity_2m !== undefined
+      ? wData.current.relative_humidity_2m
+      : (wData.hourly && wData.hourly.relative_humidity_2m ? wData.hourly.relative_humidity_2m[0] : 62);
 
     // 5 Günlük Tahmin
     const dailyForecast = [];
@@ -889,21 +808,21 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
         const idx = (currentHourIndex + i) % wData.hourly.time.length;
         const timeStr = wData.hourly.time[idx];
         const hourLabel = timeStr ? timeStr.slice(11, 16) : `${i}:00`;
-        const tempVal = Math.round(wData.hourly.temperature_2m[idx] !== undefined ? wData.hourly.temperature_2m[idx] : wData.current_weather.temperature);
+        const tempVal = Math.round(wData.hourly.temperature_2m && wData.hourly.temperature_2m[idx] !== undefined ? wData.hourly.temperature_2m[idx] : roundedTemp);
         hourlyList.push({ time: hourLabel, temp: tempVal });
       }
     }
 
     return {
       name: cityName,
-      temp: Math.round(wData.current_weather.temperature),
+      temp: roundedTemp,
       feelsLike: feelsLikeVal,
-      tempMax: wData.daily ? Math.round(wData.daily.temperature_2m_max[0]) : Math.round(wData.current_weather.temperature + 4),
-      tempMin: wData.daily ? Math.round(wData.daily.temperature_2m_min[0]) : Math.round(wData.current_weather.temperature - 4),
+      tempMax: wData.daily ? Math.round(wData.daily.temperature_2m_max[0]) : roundedTemp + 4,
+      tempMin: wData.daily ? Math.round(wData.daily.temperature_2m_min[0]) : roundedTemp - 4,
       condition: currentInfo.condition,
-      wind: Math.round(wData.current_weather.windspeed),
-      windDirection: wData.current_weather.winddirection,
-      humidity: wData.hourly && wData.hourly.relative_humidity_2m ? wData.hourly.relative_humidity_2m[0] : 62,
+      wind: windSpeedVal,
+      windDirection: windDirectionVal,
+      humidity: humidityVal,
       uvIndex: wData.daily && wData.daily.uv_index_max ? Math.round(wData.daily.uv_index_max[0] * 10) / 10 : 4.5,
       sunrise: wData.daily && wData.daily.sunrise ? wData.daily.sunrise[0] : null,
       sunset: wData.daily && wData.daily.sunset ? wData.daily.sunset[0] : null,
@@ -940,7 +859,7 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
       showToastNotification(`📍 ${locationName || 'Mevcut Konum'} hava durumu yüklendi!`);
     } catch (err) {
       console.error("Geocoding/Weather fetch error:", err);
-      setGeoError("Konum hava durumu çekilemedi.");
+      setGeoError("Şehir bulunamadı, lütfen geçerli bir şehir yazın.");
     } finally {
       setGeoLoading(false);
     }
@@ -995,28 +914,20 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
     if (!rawInput) return;
 
     setGeoError('');
-    const normalizedKey = normalizeText(rawInput);
-    const apiSearchName = TURKISH_CITIES_MAP[normalizedKey] || rawInput;
 
     try {
       // 1. Open-Meteo Geocoding API ile arama
-      let geoRes = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(apiSearchName)}&count=5&language=tr`
+      const geoRes = await fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(rawInput)}&count=5&language=tr`
       );
-      let geoData = await geoRes.json();
+      if (!geoRes.ok) {
+        throw new Error("Geocoding API request failed");
+      }
+      const geoData = await geoRes.json();
 
       let match = null;
-      if (geoData.results && geoData.results.length > 0) {
+      if (geoData && geoData.results && geoData.results.length > 0) {
         match = geoData.results.find(r => r.country_code === 'TR') || geoData.results[0];
-      } else if (apiSearchName !== rawInput) {
-        // İkinci şans: doğrudan rawInput ile arama yap
-        geoRes = await fetch(
-          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(rawInput)}&count=5&language=tr`
-        );
-        geoData = await geoRes.json();
-        if (geoData.results && geoData.results.length > 0) {
-          match = geoData.results.find(r => r.country_code === 'TR') || geoData.results[0];
-        }
       }
 
       if (match) {
@@ -1027,11 +938,11 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
         setCityInput('');
         showToastNotification(`🌤️ ${name} canlı hava durumu yüklendi! (${fullData.temp}°C)`);
       } else {
-        setGeoError(`'${rawInput}' için şehir bulunamadı. Lütfen geçerli bir şehir yazın.`);
+        setGeoError("Şehir bulunamadı, lütfen geçerli bir şehir yazın.");
       }
     } catch (err) {
       console.error("Search weather error:", err);
-      setGeoError("Hava durumu API sunucusuna ulaşılamadı. Lütfen internet bağlantınızı kontrol edin.");
+      setGeoError("Şehir bulunamadı, lütfen geçerli bir şehir yazın.");
     }
   };
 
