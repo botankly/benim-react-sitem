@@ -832,28 +832,28 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
   const [geoLoading, setGeoLoading] = useState(false);
   const [geoError, setGeoError] = useState('');
 
-  // Tam Detaylı Hava Verisi Çekici (Open-Meteo & Air Quality API)
+  // Tam Detaylı Canlı Hava Verisi Çekici (Open-Meteo REST API & Air Quality API)
   const fetchFullWeatherData = async (latitude, longitude, cityName) => {
     const wRes = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max&timezone=auto`
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m,wind_direction_10m&current_weather=true&hourly=temperature_2m,relative_humidity_2m,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max&timezone=auto`
     );
     const wData = await wRes.json();
 
-    let aqiVal = 38;
+    let aqiVal = 35;
     try {
       const aqRes = await fetch(
         `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${latitude}&longitude=${longitude}&current=us_aqi`
       );
       const aqData = await aqRes.json();
-      if (aqData && aqData.current && aqData.current.us_aqi) {
+      if (aqData && aqData.current && aqData.current.us_aqi !== undefined) {
         aqiVal = Math.round(aqData.current.us_aqi);
       }
     } catch (e) {
-      aqiVal = Math.floor(Math.random() * 30) + 25;
+      console.warn("AQI API fetch notice:", e);
     }
 
-    const currentInfo = mapWeatherCode(wData.current_weather.weathercode);
-    const isDay = wData.current_weather.is_day !== undefined ? wData.current_weather.is_day : 1;
+    const currentInfo = mapWeatherCode(wData.current_weather ? wData.current_weather.weathercode : 0);
+    const isDay = wData.current_weather && wData.current_weather.is_day !== undefined ? wData.current_weather.is_day : 1;
     const feelsLikeVal = wData.hourly && wData.hourly.apparent_temperature && wData.hourly.apparent_temperature[0] !== undefined
       ? Math.round(wData.hourly.apparent_temperature[0])
       : Math.round(wData.current_weather.temperature);
@@ -889,7 +889,7 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
         const idx = (currentHourIndex + i) % wData.hourly.time.length;
         const timeStr = wData.hourly.time[idx];
         const hourLabel = timeStr ? timeStr.slice(11, 16) : `${i}:00`;
-        const tempVal = Math.round(wData.hourly.temperature_2m[idx] || wData.current_weather.temperature);
+        const tempVal = Math.round(wData.hourly.temperature_2m[idx] !== undefined ? wData.hourly.temperature_2m[idx] : wData.current_weather.temperature);
         hourlyList.push({ time: hourLabel, temp: tempVal });
       }
     }
@@ -904,7 +904,7 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
       wind: Math.round(wData.current_weather.windspeed),
       windDirection: wData.current_weather.winddirection,
       humidity: wData.hourly && wData.hourly.relative_humidity_2m ? wData.hourly.relative_humidity_2m[0] : 62,
-      uvIndex: wData.daily && wData.daily.uv_index_max ? wData.daily.uv_index_max[0] : 4.5,
+      uvIndex: wData.daily && wData.daily.uv_index_max ? Math.round(wData.daily.uv_index_max[0] * 10) / 10 : 4.5,
       sunrise: wData.daily && wData.daily.sunrise ? wData.daily.sunrise[0] : null,
       sunset: wData.daily && wData.daily.sunset ? wData.daily.sunset[0] : null,
       aqi: aqiVal,
@@ -989,33 +989,49 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
     localStorage.setItem('todos', JSON.stringify(todos));
   }, [todos]);
 
-  // Hava Durumu Arama Handler
+  // Canlı Hava Durumu Arama Handler (Geocoding API -> Forecast API)
   const handleSearch = async (targetCity) => {
     const rawInput = (targetCity || cityInput).trim();
     if (!rawInput) return;
 
+    setGeoError('');
     const normalizedKey = normalizeText(rawInput);
     const apiSearchName = TURKISH_CITIES_MAP[normalizedKey] || rawInput;
 
     try {
-      const geoRes = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(apiSearchName)}&count=1&language=tr`
+      // 1. Open-Meteo Geocoding API ile arama
+      let geoRes = await fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(apiSearchName)}&count=5&language=tr`
       );
-      const geoData = await geoRes.json();
+      let geoData = await geoRes.json();
 
+      let match = null;
       if (geoData.results && geoData.results.length > 0) {
-        const { latitude, longitude, name } = geoData.results[0];
+        match = geoData.results.find(r => r.country_code === 'TR') || geoData.results[0];
+      } else if (apiSearchName !== rawInput) {
+        // İkinci şans: doğrudan rawInput ile arama yap
+        geoRes = await fetch(
+          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(rawInput)}&count=5&language=tr`
+        );
+        geoData = await geoRes.json();
+        if (geoData.results && geoData.results.length > 0) {
+          match = geoData.results.find(r => r.country_code === 'TR') || geoData.results[0];
+        }
+      }
+
+      if (match) {
+        const { latitude, longitude, name } = match;
         const fullData = await fetchFullWeatherData(latitude, longitude, name);
         setWeatherData({ ...fullData, isGeo: false });
         addToSearchHistory(name);
         setCityInput('');
+        showToastNotification(`🌤️ ${name} canlı hava durumu yüklendi! (${fullData.temp}°C)`);
       } else {
-        const capitalizedCity = apiSearchName.charAt(0).toUpperCase() + apiSearchName.slice(1);
-        addToSearchHistory(capitalizedCity);
-        setCityInput('');
+        setGeoError(`'${rawInput}' için şehir bulunamadı. Lütfen geçerli bir şehir yazın.`);
       }
     } catch (err) {
       console.error("Search weather error:", err);
+      setGeoError("Hava durumu API sunucusuna ulaşılamadı. Lütfen internet bağlantınızı kontrol edin.");
     }
   };
 
