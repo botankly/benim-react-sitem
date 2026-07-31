@@ -835,7 +835,7 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
   // Tam Detaylı Hava Verisi Çekici (Open-Meteo & Air Quality API)
   const fetchFullWeatherData = async (latitude, longitude, cityName) => {
     const wRes = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=temperature_2m,relative_humidity_2m,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max&timezone=auto`
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max&timezone=auto`
     );
     const wData = await wRes.json();
 
@@ -854,6 +854,9 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
 
     const currentInfo = mapWeatherCode(wData.current_weather.weathercode);
     const isDay = wData.current_weather.is_day !== undefined ? wData.current_weather.is_day : 1;
+    const feelsLikeVal = wData.hourly && wData.hourly.apparent_temperature && wData.hourly.apparent_temperature[0] !== undefined
+      ? Math.round(wData.hourly.apparent_temperature[0])
+      : Math.round(wData.current_weather.temperature);
 
     // 5 Günlük Tahmin
     const dailyForecast = [];
@@ -894,6 +897,7 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
     return {
       name: cityName,
       temp: Math.round(wData.current_weather.temperature),
+      feelsLike: feelsLikeVal,
       tempMax: wData.daily ? Math.round(wData.daily.temperature_2m_max[0]) : Math.round(wData.current_weather.temperature + 4),
       tempMin: wData.daily ? Math.round(wData.daily.temperature_2m_min[0]) : Math.round(wData.current_weather.temperature - 4),
       condition: currentInfo.condition,
@@ -2199,11 +2203,18 @@ LinkedIn:  https://www.linkedin.com/in/botan-k%C3%BClay-6786a4295/`;
                   </div>
                 </div>
 
-                {/* Sıcaklık Gösterimi (Seçili Birim ile) */}
+                {/* Sıcaklık Gösterimi (Seçili Birim ile & Hissedilen Sıcaklık) */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px', marginBottom: '12px' }}>
-                  <span style={{ fontSize: '40px', fontWeight: '900', color: activeTheme.accent, letterSpacing: '-1px', textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>
-                    {formatTemp(weatherData.temp)}°{tempUnit}
-                  </span>
+                  <div>
+                    <span style={{ fontSize: '40px', fontWeight: '900', color: activeTheme.accent, letterSpacing: '-1px', textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>
+                      {formatTemp(weatherData.temp)}°{tempUnit}
+                    </span>
+                    {weatherData.feelsLike !== undefined && (
+                      <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', marginLeft: '10px', fontWeight: '600' }}>
+                        (Hissedilen: {formatTemp(weatherData.feelsLike)}°)
+                      </span>
+                    )}
+                  </div>
                   <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '13px', fontWeight: '600' }}>
                     Yüksek: <strong style={{ color: '#f43f5e' }}>{formatTemp(weatherData.tempMax)}°</strong> / Düşük: <strong style={{ color: '#60a5fa' }}>{formatTemp(weatherData.tempMin)}°</strong>
                   </span>
